@@ -8,19 +8,38 @@
 </style>
 
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://localhost:2345/lib/d3.v3.min.js"></script>
+<script src="http://localhost:2345/lib/numeric-1.2.6.js"></script>
+<script src="http://localhost:2345/mvp.js"></script>
 <script>
 
   var margin = {top: 20, right: 20, bottom: 30, left: 40},
        width = 960 - margin.left - margin.right,
-      height  = 500 - margin.top - margin.bottom;
+      height = 500 - margin.top - margin.bottom;
 
-  d3.tsv("scatterData.tsv", 
+  var wghtScaling = 0.7;
+
+  var pfc1 = {rtn:5.1, rsk:3.5, wgt:14};
+  var pfe1 = {rtn:7.0, rsk:4.2, wgt:47};
+  var pfg1 = {rtn:0.9, rsk:1.1, wgt:39};
+  var pfCorr = [[1.0, 0.2, 0.8],
+                [0.2, 1.0, 0.3],
+                [0.8, 0.3, 1.0]];
+
+  function dltaPf(assti, deltaWght) {
+    wgts = [pfc1.wgt, pfe1.wgt, pfg1.wgt];
+    wgts[assti] += deltaWght/10;
+    pfRR = calcPfRiskEnRtn(pfCorr, [pfc1.rsk, pfe1.rsk, pfg1.rsk], [pfc1.rtn, pfe1.rtn, pfg1.rtn], wgts, 3);
+    console.log("dltaPf IN assti:"+assti+", deltaWght:"+deltaWght+" OUT rsk="+pfRR.rsk+", rtn"+pfRR.rtn);
+    return pfRR;
+  }
+
+  d3.tsv("scatterDataSmall.tsv", 
     function(error, data) {
       data.forEach(function(d) {
-        d.oneYrReturn = +d.oneYrReturn;
-        d.oneYrRisk   = +d.oneYrRisk;
-        d.assetWeight = +d.assetWeight;
+        d.oneYrReturn = +d.oneYrReturn;   // in percent
+        d.oneYrRisk   = +d.oneYrRisk;     // in percent
+        d.assetWeight = +d.assetWeight;   // in perdec
      });
 
   var x     = d3.scale.linear().range([0, width]);
@@ -34,8 +53,8 @@
   var color = d3.scale.category10();
 
   var svg = d3.select("body").append("svg")
-      .attr("width",  width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("width",  width  + margin.left + margin.right)
+      .attr("height", height + margin.top  + margin.bottom)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -63,24 +82,31 @@
               .on("drag", function(d,i) {
                              d.oneYrReturn += d3.event.dx;
                              d.oneYrRisk   += d3.event.dy;
-                             // d.assetWeight += d3.event.dx+d3.event.dy;
-                             console.log(d.assetWeight)
-                             //d3.select(this).attr("r", function(d,i){ return d.assetWeight });
-                             data.forEach(function(dd) { 
-                                                dd.assetWeight += d3.event.dx+d3.event.dy;
-                                             // d3.selectAll("circle").attr("r", function(dd) { return d.assetWeight; })
-                                           })
+                             deltaWght = d3.event.dx+d3.event.dy * wghtScaling;
+                             d.assetWeight += deltaWght;
+                             d3.select(this).attr("r", function(dd){ return dd.assetWeight });
+                             rr = dltaPf(i, d.assetWeight);
+                             d3.select("[id=p]")
+                                   .attr("r",  20)
+                                   .attr("cx", x(rr.rsk))
+                                   .attr("cy", y(rr.rtn));
+//                                   .attr("cx", Math.sqrt(d.assetWeight)*10)
+//                                   .attr("cy", Math.sqrt(d.assetWeight)*10);
                           }
                  );
+
+// document.querySelector("circle").__data__
 
   svg.selectAll(".dot")
 	.data(data)
 	.enter().append("circle")
+          .attr("id", function(d) { return (d.assetId); })
+          //       circle.each(function(d) { d.element = this; }) 
   	  .attr("class", "dot")
-	  .attr("r",       function(d) { return d.assetWeight*2; })  
-	  .attr("cx",      function(d) { return x(d.oneYrRisk); })
-	  .attr("cy",      function(d) { return y(d.oneYrReturn); })
-	  .style("fill",   function(d) { return color(d.assetClass); })
+	  .attr("r",       function(d) { return d.assetWeight * wghtScaling; })  
+	  .attr("cx",      function(d) { return x(d.oneYrRisk);              })
+	  .attr("cy",      function(d) { return y(d.oneYrReturn);            })
+	  .style("fill",   function(d) { return color(d.assetClass);         })
           .call(drag);
 
     var legend = svg.selectAll(".legend")
@@ -91,7 +117,7 @@
 
     legend.append("rect")
 	.attr("x", width - 18)
-	.attr("width", 18)
+	.attr("width",  18)
 	.attr("height", 18)
 	.style("fill", color);
 
@@ -101,8 +127,6 @@
 	.attr("dy", ".35em")
 	.style("text-anchor", "end")
 	.text(function(d) { return d; });
-   
-           
 
 });
 
