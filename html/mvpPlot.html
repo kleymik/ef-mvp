@@ -1,54 +1,26 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-
-body {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.dot {
-  stroke: #000;
-}
-
-
+ body {  font: 10px sans-serif;}
+ .axis path,
+ .axis line {  fill: none;  stroke: #000;  shape-rendering: crispEdges;}
+ .dot       {  stroke: #000; }
 </style>
+
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-
-
   var margin = {top: 20, right: 20, bottom: 30, left: 40},
-      width = 960 - margin.left - margin.right,
+       width = 960 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-  var x = d3.scale.linear()
-      .range([0, width]);
-
-  var y = d3.scale.linear()
-      .range([height, 0]);
+  var x = d3.scale.linear().range([0, width]);
+  var y = d3.scale.linear().range([height, 0]);
 
   var color = d3.scale.category10();
 
-  var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
-
-  var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left");
-
-  var drag = d3.behavior.drag()
-           .on("drag", function(d,i) {
-                         d.x += d3.event.dx
-                         d.y += d3.event.dy
-                         d3.select(this).attr("transform", function(d,i){ return "translate(" + [ d.x,d.y ] + ")" }) });
+  var xAxis = d3.svg.axis().scale(x).orient("bottom");
+  var yAxis = d3.svg.axis().scale(y).orient("left");
 
   d3.tsv("scatterData.tsv", 
     function(error, data) {
@@ -98,14 +70,16 @@ body {
 	.attr("cy",      function(d) { return y(d.oneYrReturn); })
 	.style("fill",   function(d) { return color(d.assetClass); });
 
-    svg.selectAll(".dot")
-        //.attr("transform", "translate(" + .attr("x") + "," + .attr("y") + ")")
-        .attr("transform", "translate(" + x + "," + y + ")")
-        .call(drag)
-
 //    svg.selectAll(".dot")
-//        .on("mouseover", function()  { d3.select(this).style("fill", "aliceblue"); } )
-//        .on("mouseout",  function(d) { d3.select(this).style("fill", color(d.assetClass));});
+//        //.attr("transform", "translate(" + .attr("x") + "," + .attr("y") + ")")
+//        .call(drag)
+
+    svg.selectAll(".dot")
+        .on("mouseover", function()    { d3.select(this).style("fill", "aliceblue"); } )
+//      .on("mouseout",  function(d)   { d3.select(this).style("fill", color(d.assetClass));});
+        .on("mouseout",  function(d)   { d3.select(this).attr("cx", d3.event.y) });
+//      .on("drag",      function(d,i) { d.oneYrReturn += d3.event.dx/100;});
+
 
 //    svg.selectAll(".dot")
 //        .on("mouseover",  function(d)   { d3.select(this).attr("r", 20);});
