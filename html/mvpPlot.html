@@ -45,54 +45,52 @@ var yAxis = d3.svg.axis()
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
-    .append("g")
+  .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 d3.tsv("scatterData.tsv", function(error, data) {
   data.forEach(function(d) {
-    d.oneYrReturn = +d.oneYrReturn;
-    d.oneYrRisk = +d.oneYrRisk;
-    d.petalLength = +d.petalLength;
+    d.sepalLength = +d.sepalLength;
+    d.sepalWidth = +d.sepalWidth;
   });
 
-  x.domain(d3.extent(data, function(d) { return d.oneYrRisk; })).nice();
-  y.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
-  // r.domain(d3.extent(data, function(d) { return d.petalLength; })).nice();
+  x.domain(d3.extent(data, function(d) { return d.sepalWidth; })).nice();
+  y.domain(d3.extent(data, function(d) { return d.sepalLength; })).nice();
 
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
-      .append("text")
+    .append("text")
       .attr("class", "label")
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("1 Year Risk %");
+      .text("Sepal Width (cm)");
 
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
-      .append("text")
+    .append("text")
       .attr("class", "label")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("1 Year Return %")
+      .text("Sepal Length (cm)")
 
   svg.selectAll(".dot")
       .data(data)
-      .enter().append("circle")
+    .enter().append("circle")
       .attr("class", "dot")
-      .attr("r", function(d)  { return d.petalLength*2; })  //      .attr("r", 13.5)
-      .attr("cx", function(d) { return x(d.oneYrRisk); })
-      .attr("cy", function(d) { return y(d.oneYrReturn); })
-      .style("fill", function(d) { return color(d.assetClass); });
+      .attr("r", 3.5)
+      .attr("cx", function(d) { return x(d.sepalWidth); })
+      .attr("cy", function(d) { return y(d.sepalLength); })
+      .style("fill", function(d) { return color(d.species); });
 
   var legend = svg.selectAll(".legend")
       .data(color.domain())
-      .enter().append("g")
+    .enter().append("g")
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
@@ -108,26 +106,6 @@ d3.tsv("scatterData.tsv", function(error, data) {
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(function(d) { return d; });
-
-function mousedown() {
-  points.push(selected = dragged = d3.mouse(svg.node()));
-  redraw();
-}
-
-function mousemove() {
-  if (!dragged) return;
-  var m = d3.mouse(svg.node());
-  dragged[0] = Math.max(0, Math.min(width, m[0]));
-  dragged[1] = Math.max(0, Math.min(height, m[1]));
-  redraw();
-}
-
-function mouseup() {
-  if (!dragged) return;
-  mousemove();
-  dragged = null;
-}
-
 
 });
 
