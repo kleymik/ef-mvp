@@ -1,0 +1,19 @@
+
+Derived from:
+ mbostock’s block #3887118 Scatterplot
+ June 9, 2013
+
+ Open in a new window.
+
+ This scatterplot is constructed from a TSV file storing the dimensions
+ of sepals and petals of various iris flowers. The chart employs
+ conventional margins and a number of D3 features:
+
+    d3.tsv - load and parse data
+    d3.scale.linear - x- and y-position encoding
+    d3.scale.ordinal - color encoding
+    d3.extent - compute domains
+    d3.svg.axis - display axes
+
+index.html
+
