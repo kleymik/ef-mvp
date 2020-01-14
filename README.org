@@ -1,5 +1,28 @@
+MVPVV  - Minimum Variance Portfolio Vary Visually
 
-Derived from:
+mvp/lib           javascript
+mvp/3lib          third party javascript
+mvp/html          the web page
+mvp/html/data     the data read-in by the web page
+mvp/logs          sample console log
+
+1) start webserver
+
+Python3 -m http.server 8888
+
+python -m SimpleHTTPServer 2345
+
+in directory with JS code
+    mvp.js
+    lib/d3.v3.min.js
+    lib/numeric-1.2.6.min.js
+
+2) Open page html/scatterPlot.html
+
+it access data under html/data
+
+
+* Derived from:
  mbostock’s block #3887118 Scatterplot
  June 9, 2013
 
@@ -16,4 +39,10 @@ Derived from:
     d3.svg.axis - display axes
 
 index.html
+
+* lognotes:
+20200113_22:46:28 revived for move to git
+20171029_00:26:59 renamed to mvpVary
+20171029_00:02:56 latest version was in home/kleyn/Emp/tw20/projects/svnw/reactiveRrBubbleChart
+20171029_00:02:54 Used to be called reactiveRrBubbleChart
 
