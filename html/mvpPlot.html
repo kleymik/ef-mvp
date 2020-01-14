@@ -34,10 +34,17 @@
     return pfRR;
   }
 
+//  var dataJson;
+//  d3.json("scatterData.json", function(error, json) {
+//                if (error) return console.warn(error);
+//     dataJson = json;
+//  });
+
   d3.tsv("scatterDataSmall.tsv", 
     function(error, data) {
       data.forEach(function(d) {
         d.oneYrReturn = +d.oneYrReturn;   // in percent
+        // alert(d.assetId)
         d.oneYrRisk   = +d.oneYrRisk;     // in percent
         d.assetWeight = +d.assetWeight;   // in perdec
      });
@@ -78,16 +85,17 @@
 	.style("text-anchor", "end")
 	.text("1 Year Return %");
 
+// $.find("svg rect.aName")[0].__data__;
   var drag = d3.behavior.drag()
               .on("drag", function(d,i) {
-                             d.oneYrReturn += d3.event.dx;
-                             d.oneYrRisk   += d3.event.dy;
-                             deltaWght = d3.event.dx+d3.event.dy * wghtScaling;
+                             // d.oneYrReturn += d3.event.dx;
+                             // d.oneYrRisk   += d3.event.dy;
+                             deltaWght = d3.event.dx+d3.event.dy;
                              d.assetWeight += deltaWght;
-                             d3.select(this).attr("r", function(dd){ return dd.assetWeight });
-                             rr = dltaPf(i, d.assetWeight);
+                             d3.select(this).attr("r", function(dd){ return dd.assetWeight * wghtScaling});  // re-assert?!
+                             rr = dltaPf(i, d.assetWeight);  // update i-th asset
                              d3.select("[id=p]")
-                                   .attr("r",  20)
+                                   .attr("r",  30)
                                    .attr("cx", x(rr.rsk))
                                    .attr("cy", y(rr.rtn));
                           }
@@ -100,11 +108,13 @@
 	.enter().append("circle")
           .attr("id", function(d) { return (d.assetId); })
           //       circle.each(function(d) { d.element = this; }) 
-  	  .attr("class", "dot")
+  	  .attr("class",   function(d) { return (d.assetId); })
 	  .attr("r",       function(d) { return d.assetWeight * wghtScaling; })  
 	  .attr("cx",      function(d) { return x(d.oneYrRisk);              })
 	  .attr("cy",      function(d) { return y(d.oneYrReturn);            })
 	  .style("fill",   function(d) { return color(d.assetClass);         })
+	  .style("stroke", "grey")
+	  .style("stroke-width", 2)
           .call(drag);
 
     var legend = svg.selectAll(".legend")
