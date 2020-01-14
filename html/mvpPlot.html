@@ -17,7 +17,7 @@
        width = 960 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-  var wghtScaling = 0.7;
+  var wghtScaling = 9.0;
 
   var pfc1 = {rtn:5.1, rsk:3.5, wgt:14};
   var pfe1 = {rtn:7.0, rsk:4.2, wgt:47};
@@ -86,30 +86,50 @@
 	.text("1 Year Return %");
 
 // $.find("svg rect.aName")[0].__data__;
+// db1.filter(function(e) {return e.pfMemb==1})
+// d3.selectAll("circle").filter(function(e) {return e.pfMemb==1})
   var drag = d3.behavior.drag()
               .on("drag", function(d,i) {
-                             // d.oneYrReturn += d3.event.dx;
-                             // d.oneYrRisk   += d3.event.dy;
-                             deltaWght = d3.event.dx+d3.event.dy;
-                             d.assetWeight += deltaWght;
-                             d3.select(this).attr("r", function(dd){ return dd.assetWeight * wghtScaling});  // re-assert?!
-                             rr = dltaPf(i, d.assetWeight);  // update i-th asset
-                             d3.select("[id=p]")
-                                   .attr("r",  30)
-                                   .attr("cx", x(rr.rsk))
-                                   .attr("cy", y(rr.rtn));
-                          }
+
+   		             if (d.assetId!="p") {   							      // can't stretch the 100% weight portfolio 
+                               deltaWght = d3.event.dx+d3.event.dy;
+                               console.log("deltaWght:"+deltaWght);
+			       // update weights of all assets
+			       /// UPDATE DATA OPTION 1
+                               //dbX = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1})
+                               //dbX.each(function(e,i) { e.assetWeight=+= deltaWght; )})
+                               /// UPDATE DATA OPTION 2
+                               pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // all assets in portfolio
+                               numOtherAssets = pfAssetElems[0].length-1;
+                               pfAssetElems[0].forEach(function(x) {                                          // update their data 
+				                        // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
+				                        sameThing = (d.assetId==x.getAttribute("myid")); 
+                                                        if (sameThing) { x.__data__.assetWeight+= deltaWght; }
+                                                        else           { x.__data__.assetWeight-= deltaWght/numOtherAssets; }  // down weight the rest equally
+                                });
+                               pfAssetElems.attr("r", function(dd){ return Math.sqrt(dd.assetWeight * wghtScaling)}) // update their radii
+                               //d.assetWeight += deltaWght;
+                               // d3.select(this).attr("r", function(dd){ return Math.sqrt(dd.assetWeight * wghtScaling)});  // re-assert to trigger update
+                               rr = dltaPf(i, d.assetWeight);  // update i-th asset
+		               pfData = d3.select('circle.p')[0][0].__data__;
+		               pfData.oneYrRisk   = rr.rsk;
+                               pfData.oneYrReturn = rr.rtn ;
+                               d3.select('circle.p')                                            		      // re-assert to trigger update
+                                  .attr("cx", function(e) { return x(e.oneYrRisk); })
+                        	  .attr("cy", function(e) { return y(e.oneYrReturn); });
+                          }}
                  );
 
 // document.querySelector("circle").__data__
 
   svg.selectAll(".dot")
 	.data(data)
-	.enter().append("circle")
-          .attr("id", function(d) { return (d.assetId); })
+	.enter().append('circle')
           //       circle.each(function(d) { d.element = this; }) 
+          .attr("pfMemb",  function(d) { return (d.pfMemb); })
   	  .attr("class",   function(d) { return (d.assetId); })
-	  .attr("r",       function(d) { return d.assetWeight * wghtScaling; })  
+  	  .attr("myid",    function(d) { return (d.assetId); })
+	  .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })  // use sqrt so that circle area is proportional to weight
 	  .attr("cx",      function(d) { return x(d.oneYrRisk);              })
 	  .attr("cy",      function(d) { return y(d.oneYrReturn);            })
 	  .style("fill",   function(d) { return color(d.assetClass);         })
