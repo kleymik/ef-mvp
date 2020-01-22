@@ -6,20 +6,21 @@ mvp/html          the web page
 mvp/html/data     the data read-in by the web page
 mvp/logs          sample console log
 
-1) start webserver
+* To Run
+1) start webserver in directory mvp/lib
 
-Python3 -m http.server 8888
+Python3:  python -m http.server 2345
 
-python -m SimpleHTTPServer 2345
+(Python2: python -m SimpleHTTPServer 2345)
 
-in directory with JS code
+directory with JS code contains
     mvp.js
     lib/d3.v3.min.js
     lib/numeric-1.2.6.min.js
 
 2) Open page html/scatterPlot.html
 
-it access data under html/data
+it accesses data under html/data
 
 
 * Derived from:
