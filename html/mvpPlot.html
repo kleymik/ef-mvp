@@ -52,6 +52,10 @@
     var yAxis = d3.svg.axis().scale(y).orient("left");
     y.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
 
+    var hypb     = d3.scale.linear().range([height, 0]);
+    var hypbAxis = d3.svg.axis().scale(hypb).orient("left");
+    hypb.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
+                               
     var color = d3.scale.category10();
 
     var svg = d3.select("body").append("svg")
@@ -80,9 +84,20 @@
 	  .style("text-anchor", "end")
 	  .text("1 Year Return %");
 
+    svg.append("g").attr("class", "mvp_hyperbola")
+	  .call(hypbAxis)
+	  .append("text")
+	  .attr("class", "label")
+	  .attr("transform", "rotate(-90)")
+	  .attr("y", 6)
+	  .attr("dy", ".71em")
+	  .style("text-anchor", "end")
+	  .text("Efficient Frontier");
+                               
 // $.find("svg rect.aName")[0].__data__;
 // db1.filter(function(e) {return e.pfMemb==1})
 // d3.selectAll("circle").filter(function(e) {return e.pfMemb==1})
+
   var drag = d3.behavior.drag()
               .on("drag", function(d,i) {
 			   if (d.assetId!="p") {   							      // can't stretch the 100% weight portfolio 
