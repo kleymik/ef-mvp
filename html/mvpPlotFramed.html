@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+.container_chart_1 {
+    position: relative;
+    padding-bottom: 40%;
+    height: 0;
+    overflow: hidden;
+}
+
+.container_chart_1 iframe {
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+</style>
+
+<body>
+
+  <div class ='header'>
+    <h2> Interactive MVP Plot</h2>
+  </div>
+
+  <div class ='mvp_plot1'>
+    <iframe src='http://localhost:2345/html/mvpPlot.html' frameborder='2' scrolling='no' width=1100 height=600 id='iframe_plot1'></iframe>
+  </div>
+
+  <div class ='header'>
+    <h2> MVP Plot Description</h2>
+    <p> This plot shows a minimum variance portfolio.
+      The <i>area</i> (not the diameter) of each circle represents the weight the given asset in the portfolio.
+      The Total Portfolio (100% weight) in shown in red.
+      Drag on the circle to increase or decrease its size and hence the weight of that asset in the Portfolio.
+      As the dragged asset's weight is decreased (increased), all other assets will have their weights increased (decreased) in equal measure.
+  </div>
+  
+</body>
+
+<!--
+Iframes can best be described as embedded HTML document within another HTML document. They can best be defined as such:
+
+<iframe id="content"></iframe>
+In order to get something to show up within the embedded iframe, you have to first get the “contentDocument” of the iframe element you previously defined (reference definition of iframe above).
+
+let doc = document.getElementById("content").contentDocument;
+The “contentDocument” is then what you can use to pass to the “select” method of D3.js.
+
+d3.select(doc); 
+// continue rest of D3.js code
+-->
