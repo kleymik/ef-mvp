@@ -41,6 +41,7 @@ it accesses data under html/data
 
 index.html
 
+
 * lognotes:
 20200113_22:46:28 revived for move to git
 20171029_00:26:59 renamed to mvpVary
