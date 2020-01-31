@@ -8,7 +8,7 @@
 </style>
 
 <body>
-<script src="http://localhost:2345/3lib/d3.v3.min.js"></script>
+<script src="http://localhost:2345/3lib/d3.v3.js"></script>
 <script src="http://localhost:2345/3lib/numeric-1.2.6.js"></script>
 <script src="http://localhost:2345/lib/mvp.js"></script>
 <script>
@@ -19,14 +19,14 @@
 
   var wghtScaling = 10.0;
   var inputCorrMtx;
-  var data2;
+  var asstDataTbl2;
   var corrMtx;
   var assetDataTbl;
   var assetCount = 0;
 
   // asset correlations matrix
   d3.json("data/assetCorrsData.json", function(error, json) { inputCorrMtx = json.corr.mtx; }); // alert(json);
-  d3.json("data/assetRskRtns.json",   function(error, json) { data2 = json.data; });            // alert(json);  
+  d3.json("data/assetRskRtns.json",   function(error, json) { asstDataTbl2 = json.data; });            // alert(json);  
   d3.tsv("data/scatterData4.tsv", 
      function(error, data) {
       data.forEach(function(d,i) {
@@ -36,11 +36,11 @@
         d.assetWeight = +d.assetWeight;        // in perdec
      });
 
-    alert("Number of Assets="+assetCount);     // slice out assetCount X assetCount matrix from input Matrix
+    // alert("Number of Assets="+assetCount);     // slice out assetCount X assetCount matrix from input Matrix
     corrMtx = Array(assetCount);
     for(i=0; i<assetCount; i++){
-	corrMtx[i] = Array(assetCount);
-	for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j]; }
+        corrMtx[i] = Array(assetCount);
+        for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j]; }
     }
     
     assetDataTbl = data;                       // export data into enclosing scope
@@ -52,47 +52,101 @@
     var yAxis = d3.svg.axis().scale(y).orient("left");
     y.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
 
-    var hypb     = d3.scale.linear().range([height, 0]);
-    var hypbAxis = d3.svg.axis().scale(hypb).orient("right");
-    hypb.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
+    // var hypb     = d3.scale.linear().range([height, 0]);
+    // var hypbAxis = d3.svg.axis().scale(hypb).orient("right");
+    // hypb.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
                                
     var color = d3.scale.category10();
 
-    var svg = d3.select("body").append("svg")
-	.attr("width",  width  + margin.left + margin.right)
-	.attr("height", height + margin.top  + margin.bottom)
-	.append("g")
-	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var svg = d3.select("body").append("svg")  // rename to svgc = svg Conatiner
+        .attr("width",  width  + margin.left + margin.right)
+        .attr("height", height + margin.top  + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     svg.append("g").attr("class", "x axis")
-	  .attr("transform", "translate(0," + height + ")")
-	  .call(xAxis)
-	  .append("text")
-	  .attr("class", "label")
-	  .attr("x", width)
-	  .attr("y", -6)
-	  .style("text-anchor", "end")
-	  .text("1 Year Risk %");
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+          .append("text")
+          .attr("class", "label")
+          .attr("x", width)
+          .attr("y", -6)
+          .style("text-anchor", "end")
+          .text("1 Year Risk %");
 
     svg.append("g").attr("class", "y axis")
-	  .call(yAxis)
-	  .append("text")
-	  .attr("class", "label")
-	  .attr("transform", "rotate(-90)")
-	  .attr("y", 6)
-	  .attr("dy", ".71em")
-	  .style("text-anchor", "end")
-	  .text("1 Year Return %");
+          .call(yAxis)
+          .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("1 Year Return %");
 
-    svg.append("g").attr("class", "mvp_hyperbola")
-	  .call(hypbAxis)
-	  .append("text")
-	  .attr("class", "label")
-	  .attr("transform", "rotate(-90)")
-	  .attr("y", 6)
-	  .attr("dy", ".71em")
-	  .style("text-anchor", "end")
-	  .text("mvp hyperbola");
+    // svg.append("g").attr("class", "mvp_hyperbola")
+    //       .call(hypbAxis)
+    //       .append("text")
+    //       .attr("class", "label")
+    //       .attr("transform", "rotate(-90)")
+    //       .attr("y", 6)
+    //       .attr("dy", ".71em")
+    //       .style("text-anchor", "end")
+    //       .text("mvp hyperbola");
+
+    // var width = 500;
+    // var height = 500;
+
+    //Create svg group element
+    // var g = svg.append("g").attr("transform", function(d, i) { return "translate(0,0)"; });
+
+    //The data for our line
+         var lineData = [ { "x": 1,   "y": 5},
+                          { "x": 20,  "y": 20},
+                          { "x": 40,  "y": 110},
+                          { "x": 60,  "y": 40},
+                          { "x": 80,  "y": 5},
+                          { "x": 100, "y": 110}];
+    //This is the accessor function we talked about above
+    var lineFunction = d3.svg.line()
+                          .x(function(d) { return d.x; })
+                          .y(function(d) { return d.y; })
+                          .interpolate("cardinal");  //linear basis
+    //The SVG Container
+
+    //The line SVG Path we draw
+     svg.append("path")
+            .attr("d", lineFunction(lineData))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 2)
+            .attr("fill", "none");         
+
+    // Create and append line element into svg group
+    svg.append("line")
+         .attr("x1", 250)
+         .attr("y1", 50)
+         .attr("x2", 150)
+         .attr("y2", 150)
+         .attr("stroke", "gray")
+         .attr("stroke-width", 5);
+    //     .append("text");
+
+//Ran it through the d3.svg.line() function with the accessor functions attached:
+
+    // // Create and append ellipse element into group
+    // var ellipse1 = g.append("ellipse")
+    //                .attr("cx", 250)
+    //                .attr("cy", 50)
+    //                .attr("rx", 150)
+    //                .attr("ry", 50)
+    //                .append("text")
+
+    // // Create and append text element into group
+    // g.append("text")
+    //  .attr("x", 150)
+    //  .attr("y", 50)
+    //  .attr("stroke", "#fff")
+    //  .text("This is an ellipse!");                               
                                
 // $.find("svg rect.aName")[0].__data__;
 // db1.filter(function(e) {return e.pfMemb==1})
@@ -100,73 +154,73 @@
 
   var drag = d3.behavior.drag()
               .on("drag", function(d,i) {
-			   if (d.assetId!="p") {   							      // can't stretch the 100% weight portfolio 
-			     deltaWght = (d3.event.dx+d3.event.dy)/4;
-			     console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
-			     pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // get ju sthe assets in portfolio, not other objects
-			     numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
-			     pfAssetElems[0].forEach(function(x) {                                          // update their data 
-						      sameThing = (d.assetId==x.getAttribute("myid"));      // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
-						      if (sameThing) { 
-							  newWght = x.__data__.assetWeight + deltaWght; 
-							  x.__data__.assetWeight= Math.min(Math.max(newWght, 1), 100); 
-						      } else { 
-							  newWght = x.__data__.assetWeight - deltaWght/numOtherAssets; 
-							  x.__data__.assetWeight = Math.min(Math.max(newWght,1), 100);
-						      }  // down weight the rest equally
-			     });
-			     pfAssetElems.attr("r", function(dd){ return Math.sqrt(dd.assetWeight * wghtScaling)}) // update their radii
+                           if (d.assetId!="p") {                                                              // can't stretch the 100% weight portfolio 
+                             deltaWght = (d3.event.dx+d3.event.dy)/4;
+                             console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
+                             pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // get ju sthe assets in portfolio, not other objects
+                             numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
+                             pfAssetElems[0].forEach(function(x) {                                          // update their data 
+                                                      sameThing = (d.assetId==x.getAttribute("myid"));      // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
+                                                      if (sameThing) { 
+                                                          newWght = x.__data__.assetWeight + deltaWght; 
+                                                          x.__data__.assetWeight= Math.min(Math.max(newWght, 1), 100); 
+                                                      } else { 
+                                                          newWght = x.__data__.assetWeight - deltaWght/numOtherAssets; 
+                                                          x.__data__.assetWeight = Math.min(Math.max(newWght,1), 100);
+                                                      }  // down weight the rest equally
+                             });
+                             pfAssetElems.attr("r", function(dd){ return Math.sqrt(dd.assetWeight * wghtScaling)}) // update their radii
 
-			     asstWghts = pfAssetElems[0].map(function(x) { return x.__data__.assetWeight/wghtScaling } );
-			     asstRtns  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrReturn             } );
-			     asstRsks  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrRisk               } );
+                             asstWghts = pfAssetElems[0].map(function(x) { return x.__data__.assetWeight/wghtScaling } );
+                             asstRtns  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrReturn             } );
+                             asstRsks  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrRisk               } );
 
-			     rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);
+                             rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);
 
-			     pfData = d3.select('circle.p')[0][0].__data__;
-			     pfData.oneYrRisk   = rr.rsk*wghtScaling;
-			     pfData.oneYrReturn = rr.rtn*wghtScaling ;
-			     d3.select('circle.p')                                            		      // re-assert to trigger update
-				.attr("cx", function(e) { return x(e.oneYrRisk);   })
-				.attr("cy", function(e) { return y(e.oneYrReturn); });
-			}
+                             pfData = d3.select('circle.p')[0][0].__data__;
+                             pfData.oneYrRisk   = rr.rsk*wghtScaling;
+                             pfData.oneYrReturn = rr.rtn*wghtScaling ;
+                             d3.select('circle.p')                                                            // re-assert to trigger update
+                                .attr("cx", function(e) { return x(e.oneYrRisk);   })
+                                .attr("cy", function(e) { return y(e.oneYrReturn); });
+                        }
                        }
                  );
 
 // document.querySelector("circle").__data__
 
   svg.selectAll(".dot")
-	.data(data)
-	.enter().append('circle')          								      //       circle.each(function(d) { d.element = this; }) 
+        .data(data)
+        .enter().append('circle')                                                                             //       circle.each(function(d) { d.element = this; }) 
           .attr("pfMemb",  function(d) { return (d.pfMemb);          })
-  	  .attr("class",   function(d) { return (d.assetId);         })
-  	  .attr("myid",    function(d) { return (d.assetId);         })
-	  .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })  // use sqrt so that circle area is proportional to weight
-	  .attr("cx",      function(d) { return x(d.oneYrRisk);      })
-	  .attr("cy",      function(d) { return y(d.oneYrReturn);    })
-	  .style("fill",   function(d) { return color(d.assetClass); })
-	  .style("stroke", "grey")
-	  .style("stroke-width", 2)
+          .attr("class",   function(d) { return (d.assetId);         })
+          .attr("myid",    function(d) { return (d.assetId);         })
+          .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })  // use sqrt so that circle area is proportional to weight
+          .attr("cx",      function(d) { return x(d.oneYrRisk);      })
+          .attr("cy",      function(d) { return y(d.oneYrReturn);    })
+          .style("fill",   function(d) { return color(d.assetClass); })
+          .style("stroke", "grey")
+          .style("stroke-width", 2)
           .call(drag);
 
     var legend = svg.selectAll(".legend")
-	.data(color.domain())
-	.enter().append("g")
-	.attr("class", "legend")
-	.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+        .data(color.domain())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
     legend.append("rect")
-	.attr("x", width - 18)
-	.attr("width",  18)
-	.attr("height", 18)
-	.style("fill", color);
+        .attr("x", width - 18)
+        .attr("width",  18)
+        .attr("height", 18)
+        .style("fill", color);
 
     legend.append("text")
-	.attr("x", width - 24)
-	.attr("y", 9)
-	.attr("dy", ".35em")
-	.style("text-anchor", "end")
-	.text(function(d) { return d; });
+        .attr("x", width - 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d; });
 
    });
 
