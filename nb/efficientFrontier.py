@@ -14,6 +14,7 @@
 # ---
 
 # %%
+# %matplotlib inline
 # #%auto
 #typeset_mode(True, display=true)
 print("hello") # python3
@@ -219,11 +220,23 @@ d = (b*c - a**2); sym.Matrix(d)
 (np.sqrt(1/c), a/c)
 
 # %%
-var('mu')
+mu = symbol('mu')
 fsigma(mu) = sqrt( (d + (mu*c-a)^2)/(c*d) ); fsigma
 
 # %%
-plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
+#plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
+from sympy.plotting import plot as symplot
+#mu = symbol('mu')
+#fsigma(mu) = sqrt( (d + (mu*c-a)^2)/(c*d) ); fsigma
+
+nu = sym.symbols('nu')
+#x = 0.05*nu + 0.2/((nu - 5)**2 + 2)
+x = sym.sqrt(nu)
+#x = ( (d + (nu*c-a)) / (c*d) )**0.5
+symplot(x)
+
+# %%
+# symplot?
 
 # %%
 var('sigma')
