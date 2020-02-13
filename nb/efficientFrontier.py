@@ -107,6 +107,10 @@ print("hello") # python3
 # %%
 import sympy as sym
 import IPython.display as disp
+import numpy as np
+from numpy import linalg as LA
+
+# %%
 u, s, A, B, C, D = sym.symbols('u s A B C D')
 res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
 disp.display(res[0])
@@ -122,13 +126,12 @@ disp.display(res[1])
 # ### 5: (sigma, mu) coordinates at minimum
 # $ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $
 # let $ \mu=A/C $
-# $ \sigma^2 = \\frac{D + ((A/C)C - A)^2}{CD} $
-# $ \sigma^2 = \\frac{D + (A - A)^2}{CD} $
-# $ \sigma^2 = \\frac{1}{C} $
+# $ \sigma^2 = \frac{D + ((A/C)C - A)^2}{CD} $
+# $ \sigma^2 = \frac{D + (A - A)^2}{CD} $
+# $ \sigma^2 = \frac{1}{C} $
 
 # %%
 # 0 numerical example
-import numpy as np
 
 # %%
 # 1 sample expected returns
@@ -170,6 +173,9 @@ ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
 # %%
 cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
 
+# %%
+LA.cond(cov3Inv) # check inverted matrxi condition number
+
 # %% [markdown]
 # $ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $
 #
@@ -177,7 +183,10 @@ cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
 # %%
 # for A,B,C,D calcs
 ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
-#a = (ones3 * cov3Inv * mu3.T)[0,0]; sym.Matrix(a)
+
+# %%
+a = (ones3.T * cov3Inv * mu3)[0,0]# ; sym.Matrix(a)
+a
 #print([q for q in dir() if not q.startswith('_')])
 
 # %% [markdown]
