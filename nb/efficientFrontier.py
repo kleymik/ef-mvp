@@ -8,19 +8,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.3.3
 #   kernelspec:
-#     display_name: Python 3 (Anaconda 5)
-#     env:
-#       LD_LIBRARY_PATH: /ext/anaconda5/lib
-#       PROJ_LIB: /ext/anaconda-2019.03/share/proj
-#       PYTHONHOME: /ext/anaconda5/lib/python3.5
-#       PYTHONPATH: /ext/anaconda5/lib/python3.5:/ext/anaconda5/lib/python3.5/site-packages
+#     display_name: Python 3
 #     language: python
-#     metadata:
-#       cocalc:
-#         description: Python/R distribution for data science
-#         priority: -1
-#         url: https://www.anaconda.com/distribution/
-#     name: anaconda5
+#     name: python3
 # ---
 
 # %%
@@ -116,8 +106,12 @@ print("hello") # python3
 
 # %%
 import sympy as sym
-sym.symbols('u s A B C D')
-sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
+import IPython.display as disp
+u, s, A, B, C, D = sym.symbols('u s A B C D')
+res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
+disp.display(res[0])
+disp.display(res[1])
+#dir(display)
 
 # %% [markdown]
 # ### 4: efficient frontier minimum:
