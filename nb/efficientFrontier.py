@@ -20,92 +20,91 @@
 print("hello") # python3
 
 # %% [markdown]
-# \begin{align}
-# \dot{x} & = \sigma(y-x) \\
-# \dot{y} & = \rho x - y - xz \\
-# \dot{z} & = -\beta z + xy
-# \end{align}
-
-# %% [markdown]
-# efficient frontier:
+# ## Efficient Frontier Formulae Manipulations
 #
-# re-arrange efficient frontier equation for risk($\sigma$) and for return($\mu$)
+# This note shows some manipulations for the hyperbola curve of the efficient frontier.
 #
-# calculate intermediate scalars A,B,C,D from matrix of covariance and vector of returns, numerically and symbolically
+# 1. Re-arrange efficient frontier equation for risk($\sigma$) and for return($\mu$)
 #
-# plot hyperbola of risk/return
+# 2. Calculate intermediate scalars A,B,C,D from matrix of covariance and vector of returns, numerically and symbolically
 #
-# derive mimimum risk = hyperbola and apex
+# 3. Plot hyperbola of risk/return
 #
-# "Markowitz Review Paper" href="http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf" 
-
-# %% [markdown]
+# 4. Derive mimimum risk = hyperbola and apex
 #
+# Reference: Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf (using their notation)
 
 # %% [markdown]
 # ### 1: hyperbola equation
 #
 # efficient frontier hyperbola:
 #
+# $$ \frac{\sigma^2}{1/C} - \frac{(\mu - A/C)^2}{D/C^2} = 1 $$
 #
-# $ \frac{\sigma^2}{1/C} - \frac{(\mu - A/C)^2}{D/C^2} = 1 $
 #
 # where:
 #
-# $ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $
+# $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $$
 #
-# $ B = e^T V^{-1} e $
+# $$ B = e^T V^{-1} e $$
 #
-# $ C = \mathbf{1}^T V^{-1} \mathbf{1} $
+# $$ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 #
-# $ D = BC - A^2 $
-#
-# where $e$=expected returns, $V$=covariance
+# $$ D = BC - A^2 $$
 #
 #
+# $e$ = expected returns vector
 #
-
-# %% [markdown]
-# ### 2: solve for sigma
+# $V$ = covariance matrix
 #
-# $ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $
+# $\mathbf{1}$ = Identity Matrix
 #
-# $ \frac{\sigma^2}{(1/C)} = 1 + \frac{(\mu - A/C)^2}{(D/C^2)} $
 #
-# divide by C:
-#
-# $ \frac{\sigma^2}{(C/C)} = \frac{1}{C} + \frac{(\mu - A/C)^2}{(DC/C^2)} $
-#
-# $ \sigma^2 = \frac{1}{C} + \frac{(\mu - A/C)^2}{(D/C)} $
-#
-# $ \sigma^2 = \frac{1}{C} + \frac{(\mu - A/C)^2C}{D} $
-#
-# $ \sigma^2 = \frac{1}{C} + \frac{\mu^2C - 2\mu A + A^2/C}{D} $
-#
-# $ \sigma^2 = \frac{D + \mu^2C^2 - 2\mu AC + A^2}{CD} $
-#
-# $ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $
 #
 
 # %% [markdown]
-# ### 3: solve for mu
-# $ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $
+# ### 2: solve for sigma: $\sigma$
 #
-# $ \frac{\sigma^2}{(1/C)} -1 = \frac{(\mu - A/C)^2}{(D/C^2)} $
+# $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
+#
+# $$ \frac{\sigma^2}{(1/C)} = 1 + \frac{(\mu - A/C)^2}{(D/C^2)} $$
+#
+# divide by $C$:
+#
+# $$ \frac{\sigma^2}{(C/C)} = \frac{1}{C} + \frac{(\mu - A/C)^2}{(DC/C^2)} $$
+#
+# $$ \sigma^2 = \frac{1}{C} + \frac{(\mu - A/C)^2}{(D/C)} $$
+#
+# $$ \sigma^2 = \frac{1}{C} + \frac{(\mu - A/C)^2C}{D} $$
+#
+# $$ \sigma^2 = \frac{1}{C} + \frac{\mu^2C - 2\mu A + A^2/C}{D} $$
+#
+# $$ \sigma^2 = \frac{D + \mu^2C^2 - 2\mu AC + A^2}{CD} $$
+#
+# $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
+#
+
+# %% [markdown]
+# ### 3: solve for mu: $\mu$
+#
+# $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
+#
+# $$ \frac{\sigma^2}{(1/C)} -1 = \frac{(\mu - A/C)^2}{(D/C^2)} $$
 #
 # multiply through by $ D/C^2 $
 #
-# $ \frac{D \sigma^2}{(C^2/C)} - \frac{D}{C^2}  =  (\mu - A/C)^2 $
+# $$ \frac{D \sigma^2}{(C^2/C)} - \frac{D}{C^2}  =  (\mu - A/C)^2 $$
 #
-# $ \sqrt{\frac{D \sigma^2}{C} - \frac{D}{C^2}} =  (\mu - A/C) $
-# $ \sqrt{\frac{D(C \sigma^2-1)}{C^2}} =  (\mu - A/C) $
-# $ \mu = \frac{\sqrt{D(C\sigma^2-1)}}{C} + A/C $
-# $ \mu = \frac{\sqrt{D(C\sigma^2-1)}+A}{C} $
-
-# %% [markdown]
-# $ \frac{\sigma^2}{1/C} - \frac{(\mu - A/C)^2}{D/C^2} = 1$, where $D = BC - A^2 $
+# $$ \sqrt{\frac{D \sigma^2}{C} - \frac{D}{C^2}} =  (\mu - A/C) $$
+#
+# $$ \sqrt{\frac{D(C \sigma^2-1)}{C^2}} =  (\mu - A/C) $$
+#
+# $$ \mu = \frac{\sqrt{D(C\sigma^2-1)}}{C} + A/C $$
+#
+# $$ \mu = \frac{\sqrt{D(C\sigma^2-1)}+A}{C} $$
 
 # %%
+# all imporrts, for numerical example
 import sympy as sym
 import IPython.display as disp
 import numpy as np
@@ -125,17 +124,20 @@ disp.display(res[1])
 
 # %% [markdown]
 # ### 5: (sigma, mu) coordinates at minimum
-# $ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $
+# $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
+#
 # let $ \mu=A/C $
-# $ \sigma^2 = \frac{D + ((A/C)C - A)^2}{CD} $
-# $ \sigma^2 = \frac{D + (A - A)^2}{CD} $
-# $ \sigma^2 = \frac{1}{C} $
+# $$ \sigma^2 = \frac{D + ((A/C)C - A)^2}{CD} $$
+#
+# $$ \sigma^2 = \frac{D + (A - A)^2}{CD} $$
+#
+# $$ \sigma^2 = \frac{1}{C} $$
+
+# %% [markdown]
+# ## numerical example
 
 # %%
-# 0 numerical example
-
-# %%
-# 1 sample expected returns
+# 1 sample expected returns, in perunit
 mu3 = np.matrix([0.1, 0.05, 0.03]).T; sym.Matrix(mu3)
 
 # %%
@@ -146,26 +148,25 @@ cor3 = np.matrix([[ 1.,          0.61229076, -0.13636468],
 
 # %%
 # 3 sample vols (stdev)
-# vol3 = matrix([ 1.27241802,  1.37165177,  1.39931956])*3; vol3
 vol3 = np.matrix([ 0.05,  0.08,  0.02]); sym.Matrix(vol3)
 
 # %%
-# 4 cov from vol and cor (element-wise)
+# 4 covariances from vols and correlation (element-wise!)
 cov3 = np.matrix(np.multiply(vol3.T * vol3, cor3)); sym.Matrix(cov3)
 
 # %%
-# 5 check risk = sqrt(variance)
+# 5 check: risk = sqrt(variance)
 vol3chk = np.sqrt(cov3.diagonal()); sym.Matrix(vol3chk) # OK!
 
 # %%
-# 6 check: from cov back to cor
+# 6 check: from covariances back to correlations
 cor3chk = np.reciprocal(vol3)  * cov3 * np.reciprocal(vol3).T; sym.Matrix(cor3chk) # OK!
 
 # %%
 # sample covariance matrix
 cov3B = np.matrix([[1.61904762, 1.52285714, 0.90285714],
-               [1.52285714, 1.88142857, 1.39309524],
-               [0.90285714, 1.39309524, 1.95809524]]); sym.Matrix(cov3B)
+                   [1.52285714, 1.88142857, 1.39309524],
+                   [0.90285714, 1.39309524, 1.95809524]]); sym.Matrix(cov3B)
 
 # %%
 # for A,B,C,D calcs
@@ -182,7 +183,7 @@ LA.cond(cov3Inv) # check inverted matrxi condition number
 #
 
 # %%
-# for A,B,C,D calcs
+# for A,B,C,D numerical examples calcs: a,b,c,d
 ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
 
 # %%
@@ -211,17 +212,19 @@ d = (b*c - a**2); sym.Matrix(d)
 # %% [markdown]
 # from above
 #
-# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
+# $$ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $$
 #
-# $ \mu    =    \frac{\sqrt{D(C\sigma^2-1)}+A}{C}    $
+# $$ \mu    =    \frac{\sqrt{D(C\sigma^2-1)}+A}{C} $$
 
 # %%
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
 # %%
-mu = symbol('mu')
-fsigma(mu) = sqrt( (d + (mu*c-a)^2)/(c*d) ); fsigma
+#fsigma = exp( (d + (mu*c-a)**2) / (c*d) ),0.5)
+nu = sym.symbols('nu')
+#fsigma = np.exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
+d
 
 # %%
 #plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
@@ -265,13 +268,15 @@ line(v, figsize=[4,4])
 
 # %%
 # symbolic form of hyperbola in terms of asset variances and returns
-var('u,s,A,B,C,D, E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2')
-V = matrix([[s1^2, cv12, cv13],
-            [cv12, s2^2, cv12],
-            [cv13, cv12, s3^2]]);V
+u,s,A,B,C,D,E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2 = sym.symbols(
+    'u s A B C D E  s1 s2 s3 cv12 cv13 cv23  r0 r1 r2')
+
+V = sym.Matrix([[s1**2, cv12, cv13],
+               [cv12, s2**2, cv12],
+               [cv13, cv12, s3**2]]);V
 
 # %%
-V.inverse()[0,1]-V.inverse()[1,0]
+V.inv()[0,1]-V.inv()[1,0]
 
 # %%
 V.I.is_symmetric()
@@ -311,26 +316,32 @@ D = (B*C - A^2); D
 # %%
 fsigmaSymb(u) = sqrt(D+(u*C-A)^2/(C*D)); fsigmaSymb
 
-# %% language="latex"
+# %% [markdown]
 # \begin{align}
 # \frac{\partial u}{\partial t} + \nabla \cdot \left( \boldsymbol{v} u - D\nabla u \right) = f
 # \end{align}
 #
 
+# %% [markdown]
+# \begin{align}
+# \frac{\partial u}{\partial t} + \nabla \cdot \left( \boldsymbol{v} u - D\nabla u \right) = f
+# \end{align}
+
 # %%
 fmuSymb(s) =  ( sqrt(D*(C*s^2-1)) + A) / C; fmuSymb
 
-# %%
-# %html
-\mbox{vi}_{00} + 2 \, \mbox{vi}_{01} + 2 \, \mbox{vi}_{02} + \mbox{vi}_{11} + 2 \, \mbox{vi}_{12} + \mbox{vi}_{22}}</script></html>
-}}}
+# %% [markdown]
+# \begin{align}
+# \mbox{vi}_{00} + 2 \,
+# \mbox{vi}_{01} + 2 \, 
+# \mbox{vi}_{02} + 
+# \mbox{vi}_{11} + 2 \, 
+# \mbox{vi}_{12} + 
+# \mbox{vi}_{22}
+# \end{align}
 
 # %%
 fmuSymb.diff(s)
 
 # %%
-
-# %%
 plot
-
-# %%
