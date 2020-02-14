@@ -15,9 +15,13 @@
 
 # %%
 # %matplotlib inline
+# %autosave 60
 # #%auto
 #typeset_mode(True, display=true)
 print("hello") # python3
+
+# %% language="latex"
+# \author{Mike Kleyn}
 
 # %% [markdown]
 # ## Efficient Frontier Formulae Manipulations
@@ -120,13 +124,16 @@ disp.display(res[1])
 # %% [markdown]
 # ### 4: efficient frontier minimum:
 # efficient frontier hyperbola coordinates of minimum:
-# $ (\sigma, \mu) = ( \sqrt{1/C},  ( A/C )) $
+#
+# $$ (\sigma, \mu) = ( \sqrt{1/C},  ( A/C )) $$
+#
 
 # %% [markdown]
 # ### 5: (sigma, mu) coordinates at minimum
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
-# let $ \mu=A/C $
+# let $\mu = A/C$
+#
 # $$ \sigma^2 = \frac{D + ((A/C)C - A)^2}{CD} $$
 #
 # $$ \sigma^2 = \frac{D + (A - A)^2}{CD} $$
@@ -179,7 +186,7 @@ cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
 LA.cond(cov3Inv) # check inverted matrxi condition number
 
 # %% [markdown]
-# $ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $
+# $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
 #
 
 # %%
@@ -198,7 +205,7 @@ a
 b = (mu3.T * cov3Inv * mu3); sym.Matrix(b)
 
 # %% [markdown]
-# $ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $
+# $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %%
 c = (ones3.T * cov3Inv * ones3); sym.Matrix(c)
@@ -293,25 +300,33 @@ Vi = matrix([[vi00, vi01, vi02],
 # %%
 E = matrix([r0,r1,r2]).T;E
 
+# %% [markdown]
+# $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $$
+
 # %%
 # A
-html('$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $')
 A = (ones3.T * Vi * E)[0,0]; A
+
+# %% [markdown]
+# $ B = e^T V^{-1} e $
 
 # %%
 # B
-html('$ B = e^T V^{-1} e $')
 B = (E.T * Vi * E)[0,0]; B
+
+# %% [markdown]
+# $$ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %%
 # C
-html('$ C = \mathbf{1}^T V^{-1} \mathbf{1} $')
 C = (ones3.T * Vi * ones3)[0,0]; C
+
+# %% [markdown]
+# $ D = BC - A**2  $
 
 # %%
 # D
-html('$ D = BC - A^2  $')
-D = (B*C - A^2); D
+D = (B*C - A**2); D
 
 # %%
 fsigmaSymb(u) = sqrt(D+(u*C-A)^2/(C*D)); fsigmaSymb
