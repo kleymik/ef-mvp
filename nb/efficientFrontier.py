@@ -20,11 +20,15 @@
 #typeset_mode(True, display=true)
 print("hello") # python3
 
-# %% language="latex"
-# \author{Mike Kleyn}
+# %%
+# all imports: for symbolic manipulation and for numerical example
+import sympy as sym
+import IPython.display as disp
+import numpy as np
+from numpy import linalg as LA
 
 # %% [markdown]
-# ## Efficient Frontier Formulae Manipulations
+# ## 1. Efficient Frontier Formulae Manipulations
 #
 # This note shows some manipulations for the hyperbola curve of the efficient frontier.
 #
@@ -39,7 +43,7 @@ print("hello") # python3
 # Reference: Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf (using their notation)
 
 # %% [markdown]
-# ### 1: hyperbola equation
+# ### 1.1: hyperbola equation
 #
 # efficient frontier hyperbola:
 #
@@ -67,7 +71,7 @@ print("hello") # python3
 #
 
 # %% [markdown]
-# ### 2: solve for sigma: $\sigma$
+# ### 1.2: solve for sigma: $\sigma$
 #
 # $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
 #
@@ -87,9 +91,10 @@ print("hello") # python3
 #
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
+# $$ \sigma = \sqrt{\frac{D + (\mu C -A)^2}{CD}} $$
 
 # %% [markdown]
-# ### 3: solve for mu: $\mu$
+# ### 1.3: solve for mu: $\mu$
 #
 # $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
 #
@@ -97,39 +102,25 @@ print("hello") # python3
 #
 # multiply through by $ D/C^2 $
 #
-# $$ \frac{D \sigma^2}{(C^2/C)} - \frac{D}{C^2}  =  (\mu - A/C)^2 $$
+# $$ \frac{\sigma^2 D}{(C^2/C)} - \frac{D}{C^2}  =  (\mu - A/C)^2 $$
 #
-# $$ \sqrt{\frac{D \sigma^2}{C} - \frac{D}{C^2}} =  (\mu - A/C) $$
+# $$ \sqrt{\frac{\sigma^2 D}{C} - \frac{D}{C^2}} =  (\mu - A/C) $$
 #
-# $$ \sqrt{\frac{D(C \sigma^2-1)}{C^2}} =  (\mu - A/C) $$
+# $$ \sqrt{\frac{D(\sigma^2 C - 1)}{C^2}} =  (\mu - A/C) $$
 #
-# $$ \mu = \frac{\sqrt{D(C\sigma^2-1)}}{C} + A/C $$
+# $$ \mu = \frac{\sqrt{D(\sigma^2 C - 1)}}{C} + A/C $$
 #
-# $$ \mu = \frac{\sqrt{D(C\sigma^2-1)}+A}{C} $$
-
-# %%
-# all imporrts, for numerical example
-import sympy as sym
-import IPython.display as disp
-import numpy as np
-from numpy import linalg as LA
-
-# %%
-u, s, A, B, C, D = sym.symbols('u s A B C D')
-res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
-disp.display(res[0])
-disp.display(res[1])
-#dir(display)
+# $$ \mu = \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $$
 
 # %% [markdown]
-# ### 4: efficient frontier minimum:
+# ### 1.4: efficient frontier minimum:
 # efficient frontier hyperbola coordinates of minimum:
 #
 # $$ (\sigma, \mu) = ( \sqrt{1/C},  ( A/C )) $$
 #
 
 # %% [markdown]
-# ### 5: (sigma, mu) coordinates at minimum
+# ### 1.5: (sigma, mu) coordinates at minimum
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
 # let $\mu = A/C$
@@ -141,7 +132,17 @@ disp.display(res[1])
 # $$ \sigma^2 = \frac{1}{C} $$
 
 # %% [markdown]
-# ## numerical example
+# ## 2 manipulate equation using sympy
+
+# %%
+u, s, A, B, C, D = sym.symbols('u s A B C D')
+res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
+#disp.display(res[0])
+sym.Eq(s,res[1])
+
+# %% [markdown]
+# ## 3 numerical example
+# Calculate A, B, C, & D, hence $\sigma$ and $\mu$ for small example
 
 # %%
 # 1 sample expected returns, in perunit
@@ -183,77 +184,78 @@ ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
 cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
 
 # %%
-LA.cond(cov3Inv) # check inverted matrxi condition number
+LA.cond(cov3Inv) # check condition number of the inverted matrix
 
 # %% [markdown]
 # $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
 #
 
 # %%
-# for A,B,C,D numerical examples calcs: a,b,c,d
+# for A:a, B:b, C:c, D:d numerical example
 ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
 
 # %%
-a = (ones3.T * cov3Inv * mu3)[0,0]# ; sym.Matrix(a)
-a
-#print([q for q in dir() if not q.startswith('_')])
+a = (ones3.T * cov3Inv * mu3)[0,0]; a
 
 # %% [markdown]
 # $ matrix\ B = e^T V^{-1} e $
 
 # %%
-b = (mu3.T * cov3Inv * mu3); sym.Matrix(b)
+b = (mu3.T * cov3Inv * mu3)[0,0]; b
 
 # %% [markdown]
 # $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %%
-c = (ones3.T * cov3Inv * ones3); sym.Matrix(c)
+c = (ones3.T * cov3Inv * ones3)[0,0]; c
 
 # %% [markdown]
 # $ matrix\ D = BC - A^2  $
 
 # %%
-d = (b*c - a**2); sym.Matrix(d)
+d = (b*c - a**2); d
 
 # %% [markdown]
-# from above
+# hece using, from above
 #
-# $$ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $$
-#
-# $$ \mu    =    \frac{\sqrt{D(C\sigma^2-1)}+A}{C} $$
+# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
+# and
+# $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
 # %%
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
+# %% [markdown]
+# ## 4: Symbolic Plot
+
 # %%
 #fsigma = exp( (d + (mu*c-a)**2) / (c*d) ),0.5)
-nu = sym.symbols('nu')
-#fsigma = np.exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
-d
+#fsigma = exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
+
+# %% [markdown]
+# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
 
 # %%
 #plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
 from sympy.plotting import plot as symplot
-#mu = symbol('mu')
-#fsigma(mu) = sqrt( (d + (mu*c-a)^2)/(c*d) ); fsigma
-
-nu = sym.symbols('nu')
+sgma = sym.sqrt( (d + (u*c - a)**2) / (c*d) )
+symplot(sgma, (u, -0.3, 0.3))
+#x = sym.sqrt(nu)+nu
+#symplot(x)
+#nu = sym.symbols('nu')
 #x = 0.05*nu + 0.2/((nu - 5)**2 + 2)
-x = sym.sqrt(nu)
 #x = ( (d + (nu*c-a)) / (c*d) )**0.5
-symplot(x)
+
+
+# %% [markdown]
+# $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
 # %%
-# symplot?
+mu = ( sym.sqrt(d * (s**2 * c - 1) ) + a ) / c; mu
 
 # %%
-var('sigma')
-fmu(sigma) = ( sqrt( d * (c*sigma^2 - 1) ) + a ) / c; fmu
-
-# %%
-plot(fmu,(sigma,0.001,0.02), figsize=[4,4],legend_label='$\mu(\sigma)$')
+symplot(mu,(s,0.0,0.06), axis_center=(0.0,0.04))
 
 
 # %%
@@ -272,6 +274,10 @@ for sgm in srange(0.01,0.02,0.001):
 v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'pos')) for x in srange(1.119515028,1.125,1e-6)]
 #v = [(x, fmew(x,'neg')) for x in srange(0.02,0.01,-0.001)] + [(x, fmew(x,'pos')) for x in srange(0.01,0.02,0.001)]
 line(v, figsize=[4,4])
+
+# %% [markdown]
+# ## 5: explcit formula 
+# for small portfolio (2 assets)
 
 # %%
 # symbolic form of hyperbola in terms of asset variances and returns
@@ -331,17 +337,6 @@ D = (B*C - A**2); D
 # %%
 fsigmaSymb(u) = sqrt(D+(u*C-A)^2/(C*D)); fsigmaSymb
 
-# %% [markdown]
-# \begin{align}
-# \frac{\partial u}{\partial t} + \nabla \cdot \left( \boldsymbol{v} u - D\nabla u \right) = f
-# \end{align}
-#
-
-# %% [markdown]
-# \begin{align}
-# \frac{\partial u}{\partial t} + \nabla \cdot \left( \boldsymbol{v} u - D\nabla u \right) = f
-# \end{align}
-
 # %%
 fmuSymb(s) =  ( sqrt(D*(C*s^2-1)) + A) / C; fmuSymb
 
@@ -360,3 +355,5 @@ fmuSymb.diff(s)
 
 # %%
 plot
+
+# %%
