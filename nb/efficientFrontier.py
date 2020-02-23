@@ -40,7 +40,7 @@ from numpy import linalg as LA
 #
 # 4. Derive mimimum risk = hyperbola and apex
 #
-# Reference: Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf (using their notation)
+# Reference (using their notation): Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
 
 # %% [markdown]
 # ### 1.1: hyperbola equation
@@ -139,6 +139,9 @@ u, s, A, B, C, D = sym.symbols('u s A B C D')
 res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
 #disp.display(res[0])
 sym.Eq(s,res[1])
+
+# %%
+sym.Eq(s,sym.factor(res[1]))
 
 # %% [markdown]
 # ## 3 numerical example
@@ -240,13 +243,7 @@ d = (b*c - a**2); d
 #plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
 from sympy.plotting import plot as symplot
 sgma = sym.sqrt( (d + (u*c - a)**2) / (c*d) )
-symplot(sgma, (u, -0.3, 0.3))
-#x = sym.sqrt(nu)+nu
-#symplot(x)
-#nu = sym.symbols('nu')
-#x = 0.05*nu + 0.2/((nu - 5)**2 + 2)
-#x = ( (d + (nu*c-a)) / (c*d) )**0.5
-
+symplot(sgma, (u, -0.0, 0.3), axis_center=(0.0,0.0), xlabel='$\mu$ mu', ylabel='$\sigma$ sigma')
 
 # %% [markdown]
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
@@ -255,7 +252,7 @@ symplot(sgma, (u, -0.3, 0.3))
 mu = ( sym.sqrt(d * (s**2 * c - 1) ) + a ) / c; mu
 
 # %%
-symplot(mu,(s,0.0,0.06), axis_center=(0.0,0.04))
+symplot(mu,(s,0.0,0.06), axis_center=(0.0,0.04), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
 
 
 # %%
@@ -277,41 +274,42 @@ line(v, figsize=[4,4])
 
 # %% [markdown]
 # ## 5: explcit formula 
-# for small portfolio (2 assets)
+# for small portfolio (3 assets)
 
 # %%
 # symbolic form of hyperbola in terms of asset variances and returns
 u,s,A,B,C,D,E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2 = sym.symbols(
     'u s A B C D E  s1 s2 s3 cv12 cv13 cv23  r0 r1 r2')
 
-V = sym.Matrix([[s1**2, cv12, cv13],
-               [cv12, s2**2, cv12],
-               [cv13, cv12, s3**2]]);V
+V = sym.Matrix([[s1**2, cv12,  cv13],
+                [cv12,  s2**2, cv23],
+                [cv13,  cv23,  s3**2]]);V
 
 # %%
-V.inv()[0,1]-V.inv()[1,0]
+V.inv()
 
 # %%
-V.I.is_symmetric()
+sym.simplify(V.inv()[0,1]-V.inv()[1,0]) # check inverse
 
 # %%
-V.I
+#sym.ask(sym.Q.symmetric(V.inv()))
 
 # %%
-var('vi00,vi11,vi22, vi01,vi02,vi12')
-Vi = matrix([[vi00, vi01, vi02],
+vi00,vi11,vi22, vi01,vi02,vi12 = sym.symbols('vi00,vi11,vi22, vi01,vi02,vi12')
+Vi = sym.Matrix([[vi00, vi01, vi02],
              [vi01, vi11, vi12],
              [vi02, vi12, vi22]]);Vi
 
 # %%
-E = matrix([r0,r1,r2]).T;E
+E = sym.Matrix([r0,r1,r2]).T;E
 
 # %% [markdown]
 # $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $$
 
 # %%
 # A
-A = (ones3.T * Vi * E)[0,0]; A
+#A = (ones3 * Vi * E.T)[0,0]; A
+sym.Matrix(ones3.T) @ Vi @ E.T
 
 # %% [markdown]
 # $ B = e^T V^{-1} e $
