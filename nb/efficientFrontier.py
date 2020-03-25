@@ -13,7 +13,7 @@
 #     name: python3
 # ---
 
-# %% pycharm={"is_executing": false}
+# %%
 # #%matplotlib inline
 # #%autosave 60
 # #%auto
@@ -43,7 +43,7 @@ print("hello") # python3
 # 4 [Plot symbolic equation](#4)
 #
 
-# %% pycharm={"is_executing": false}
+# %%
 # all imports: for symbolic manipulation and for numerical example
 import sympy as sym
 import IPython.display as disp
@@ -150,7 +150,7 @@ from numpy import linalg as LA
 # $$ \sigma^2 = \frac{1}{C} $$
 
 # %% [markdown]
-# ## 2 manipulate equation using sympy
+# ## 2 manipulate equation using sympy $\sigma$ <a class="anchor" id="2"></a>
 
 # %%
 u, s, A, B, C, D = sym.symbols('u s A B C D')
@@ -159,64 +159,70 @@ res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
 sym.Eq(s,res[1])
 
 # %%
+# take positive solution only
 sym.Eq(s,sym.factor(res[1]))
 
 # %% [markdown]
-# ## 3 numerical example
+# ## 3 numerical example <a class="anchor" id="3"></a>
 # Calculate A, B, C, & D, hence $\sigma$ and $\mu$ for small example
 
 # %%
 # 1 sample expected returns, in perunit
-mu3 = np.matrix([0.1, 0.05, 0.03]).T; sym.Matrix(mu3)
+mu3 = sym.Matrix(np.array([0.1, 0.05, 0.03]).T); # mu3 = sym.Matrix(mu3)
+mu3
 
 # %%
 # 2 sample correlations
-cor3 = np.matrix([[ 1.,          0.61229076, -0.13636468],
-                  [ 0.61229076,  1.,         -0.29579264],
-                  [-0.13636468, -0.29579264,  1.        ]]); sym.Matrix(cor3)
+cor3 = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
+                   [ 0.61229076,  1.,         -0.29579264],
+                   [-0.13636468, -0.29579264,  1.        ]]); cor3
 
 # %%
 # 3 sample vols (stdev)
-vol3 = np.matrix([ 0.05,  0.08,  0.02]); sym.Matrix(vol3)
+vol3 = sym.Matrix([ 0.05,  0.08,  0.02]) ; vol3
+
 
 # %%
-# 4 covariances from vols and correlation (element-wise!)
-cov3 = np.matrix(np.multiply(vol3.T * vol3, cor3)); sym.Matrix(cov3)
+from sympy.matrices import matrix_multiply_elementwise as mme
+cov3 = mme(vol3 * vol3.T, cor3)
+cov3
 
 # %%
 # 5 check: risk = sqrt(variance)
-vol3chk = np.sqrt(cov3.diagonal()); sym.Matrix(vol3chk) # OK!
+#vol3chk = sym.sqrt(cov3.diagonal()); sym.Matrix(vol3chk) # OK!
+sym.sqrt(cov3.diagonal())
 
 # %%
 # 6 check: from covariances back to correlations
-cor3chk = np.reciprocal(vol3)  * cov3 * np.reciprocal(vol3).T; sym.Matrix(cor3chk) # OK!
+cor3chk = np.reciprocal(vol3).T  * cov3 * np.reciprocal(vol3); cor3chk = sym.Matrix(cor3chk) # OK!
+cor3chk
 
 # %%
 # sample covariance matrix
-cov3B = np.matrix([[1.61904762, 1.52285714, 0.90285714],
-                   [1.52285714, 1.88142857, 1.39309524],
-                   [0.90285714, 1.39309524, 1.95809524]]); sym.Matrix(cov3B)
+cov3B = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
+                    [1.52285714, 1.88142857, 1.39309524],
+                    [0.90285714, 1.39309524, 1.95809524]])
+cov3B
 
 # %%
 # for A,B,C,D calcs
-ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
+ones3 = sym.Matrix([1,1,1]).T
+ones3
 
-# %%
+# %% pycharm={"name": "#%%\n", "is_executing": false}
 cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
 
 # %%
-LA.cond(cov3Inv) # check condition number of the inverted matrix
+#LA.cond(cov3Inv) # check condition number of the inverted matrix
 
 # %% [markdown]
 # $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
-#
 
 # %%
-# for A:a, B:b, C:c, D:d numerical example
-ones3 = np.matrix([1,1,1]).T; sym.Matrix(ones3)
-
-# %%
-a = (ones3.T * cov3Inv * mu3)[0,0]; a
+a = (ones3 * cov3Inv * mu3)[0,0]; a
+ones3
+mu3
+ones3 * cov3Inv
 
 # %% [markdown]
 # $ matrix\ B = e^T V^{-1} e $
@@ -228,13 +234,14 @@ b = (mu3.T * cov3Inv * mu3)[0,0]; b
 # $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %%
-c = (ones3.T * cov3Inv * ones3)[0,0]; c
+c  = ones3 @ cov3Inv @ ones3.T
+c
 
 # %% [markdown]
 # $ matrix\ D = BC - A^2  $
 
 # %%
-d = (b*c - a**2); d
+d = (b*c - a**2); "d=", d
 
 # %% [markdown]
 # hece using, from above
@@ -243,14 +250,14 @@ d = (b*c - a**2); d
 # and
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
-# %% pycharm={"is_executing": false}
+# %%
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
 # %% [markdown]
 # ## 4: Symbolic Plot
 
-# %% pycharm={"is_executing": false}
+# %%
 #fsigma = exp( (d + (mu*c-a)**2) / (c*d) ),0.5)
 #fsigma = exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
 
