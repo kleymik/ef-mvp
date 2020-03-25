@@ -13,14 +13,37 @@
 #     name: python3
 # ---
 
-# %%
-# %matplotlib inline
-# %autosave 60
+# %% pycharm={"is_executing": false}
+# #%matplotlib inline
+# #%autosave 60
 # #%auto
 #typeset_mode(True, display=true)
 print("hello") # python3
 
-# %%
+# %% [markdown]
+# [//]: # (table styling via markdown) 
+# <style> table.dataframe { font-size:70%; } 
+#         body            { font-size:70%}
+# </style>
+
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# ## Efficient Frontier Stuff
+#
+# 1 [Formulae](#1)  
+# 1.1 [Hyperbolae](#1.1)  
+# 1.2 [Solve for sigma](#1.2)    
+# 1.3 [Solve for mu](#1.3)  
+# 1.4 [Efficient frontier minimum](#1.4)  
+# 1.5 [sigma & mu at minimum](#1.5)
+#
+# 2 [Solve for sigma & mu using sympy](#2)
+#
+# 3 [Numerical example](#3)
+#
+# 4 [Plot symbolic equation](#4)
+#
+
+# %% pycharm={"is_executing": false}
 # all imports: for symbolic manipulation and for numerical example
 import sympy as sym
 import IPython.display as disp
@@ -28,7 +51,7 @@ import numpy as np
 from numpy import linalg as LA
 
 # %% [markdown]
-# ## 1. Efficient Frontier Formulae Manipulations
+# ## 1. Efficient Frontier Formulae Manipulations <a class="anchor" id="1"></a>
 #
 # This note shows some manipulations for the hyperbola curve of the efficient frontier.
 #
@@ -41,9 +64,9 @@ from numpy import linalg as LA
 # 4. Derive mimimum risk = hyperbola and apex
 #
 # Reference (using their notation): Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
-
-# %% [markdown]
-# ### 1.1: hyperbola equation
+#
+#
+# ### 1.1 hyperbola equation <a class="anchor" id="1.1"></a>
 #
 # efficient frontier hyperbola:
 #
@@ -60,7 +83,6 @@ from numpy import linalg as LA
 #
 # $$ D = BC - A^2 $$
 #
-#
 # $e$ = expected returns vector
 #
 # $V$ = covariance matrix
@@ -68,10 +90,7 @@ from numpy import linalg as LA
 # $\mathbf{1}$ = Identity Matrix
 #
 #
-#
-
-# %% [markdown]
-# ### 1.2: solve for sigma: $\sigma$
+# ### 1.2: solve for sigma: $\sigma$ <a class="anchor" id="1.2"></a>
 #
 # $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
 #
@@ -92,9 +111,8 @@ from numpy import linalg as LA
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
 # $$ \sigma = \sqrt{\frac{D + (\mu C -A)^2}{CD}} $$
-
-# %% [markdown]
-# ### 1.3: solve for mu: $\mu$
+#
+# ### 1.3: solve for mu: $\mu$ <a class="anchor" id="1.3"></a>
 #
 # $$ \frac{\sigma^2}{(1/C)} - \frac{(\mu - A/C)^2}{(D/C^2)} = 1 $$
 #
@@ -113,14 +131,14 @@ from numpy import linalg as LA
 # $$ \mu = \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $$
 
 # %% [markdown]
-# ### 1.4: efficient frontier minimum:
+# ### 1.4: efficient frontier minimum $\sigma$ <a class="anchor" id="1.4"></a>
 # efficient frontier hyperbola coordinates of minimum:
 #
 # $$ (\sigma, \mu) = ( \sqrt{1/C},  ( A/C )) $$
 #
 
 # %% [markdown]
-# ### 1.5: (sigma, mu) coordinates at minimum
+# ### 1.5: (sigma, mu) coordinates at minimum $\sigma$ <a class="anchor" id="1.5"></a>
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
 # let $\mu = A/C$
@@ -225,14 +243,14 @@ d = (b*c - a**2); d
 # and
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
-# %%
+# %% pycharm={"is_executing": false}
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
 # %% [markdown]
 # ## 4: Symbolic Plot
 
-# %%
+# %% pycharm={"is_executing": false}
 #fsigma = exp( (d + (mu*c-a)**2) / (c*d) ),0.5)
 #fsigma = exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
 
