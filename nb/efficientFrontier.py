@@ -26,15 +26,15 @@ print("hello") # python3
 #         body            { font-size:70%}
 # </style>
 
-# %% [markdown] pycharm={"name": "#%% md\n"}
-# ## Efficient Frontier Stuff
+# %% [markdown]
+# # Efficient Frontier Stuff
 #
 # 1 [Formulae](#1)  
-# 1.1 [Hyperbolae](#1.1)  
-# 1.2 [Solve for sigma](#1.2)    
-# 1.3 [Solve for mu](#1.3)  
-# 1.4 [Efficient frontier minimum](#1.4)  
-# 1.5 [sigma & mu at minimum](#1.5)
+#  1.1 [Hyperbolae](#1.1)  
+#  1.2 [Solve for sigma](#1.2)    
+#  1.3 [Solve for mu](#1.3)  
+#  1.4 [Efficient frontier minimum](#1.4)  
+#  1.5 [sigma & mu at minimum](#1.5)
 #
 # 2 [Solve for sigma & mu using sympy](#2)
 #
@@ -42,16 +42,20 @@ print("hello") # python3
 #
 # 4 [Plot symbolic equation](#4)
 #
+# 5 [Explicit formulae - for 3 assets](#5)
 
 # %%
 # all imports: for symbolic manipulation and for numerical example
 import sympy as sym
+from sympy.matrices import matrix_multiply_elementwise as mme
+from sympy.plotting import plot as symplot
 import IPython.display as disp
 import numpy as np
 from numpy import linalg as LA
+print("imports done")
 
 # %% [markdown]
-# ## 1. Efficient Frontier Formulae Manipulations <a class="anchor" id="1"></a>
+# ## 1 Efficient Frontier Formulae Manipulations <a class="anchor" id="1"></a>
 #
 # This note shows some manipulations for the hyperbola curve of the efficient frontier.
 #
@@ -88,7 +92,6 @@ from numpy import linalg as LA
 # $V$ = covariance matrix
 #
 # $\mathbf{1}$ = Identity Matrix
-#
 #
 # ### 1.2: solve for sigma: $\sigma$ <a class="anchor" id="1.2"></a>
 #
@@ -129,15 +132,13 @@ from numpy import linalg as LA
 # $$ \mu = \frac{\sqrt{D(\sigma^2 C - 1)}}{C} + A/C $$
 #
 # $$ \mu = \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $$
-
-# %% [markdown]
+#
 # ### 1.4: efficient frontier minimum $\sigma$ <a class="anchor" id="1.4"></a>
+#
 # efficient frontier hyperbola coordinates of minimum:
 #
 # $$ (\sigma, \mu) = ( \sqrt{1/C},  ( A/C )) $$
 #
-
-# %% [markdown]
 # ### 1.5: (sigma, mu) coordinates at minimum $\sigma$ <a class="anchor" id="1.5"></a>
 # $$ \sigma^2 = \frac{D + (\mu C -A)^2}{CD} $$
 #
@@ -148,136 +149,202 @@ from numpy import linalg as LA
 # $$ \sigma^2 = \frac{D + (A - A)^2}{CD} $$
 #
 # $$ \sigma^2 = \frac{1}{C} $$
+#
+#
 
 # %% [markdown]
-# ## 2 manipulate equation using sympy $\sigma$ <a class="anchor" id="2"></a>
+# ## 2 manipulate equation using sympy - solve for $\sigma$ <a class="anchor" id="2"></a>
+#
+# take positive solution only:
 
 # %%
-u, s, A, B, C, D = sym.symbols('u s A B C D')
-res = sym.solve(sym.Eq( (s**2 / (1/C)) - ((u - A/C)**2 / (D / C**2)), 1),s)
+mu, sigma, A, B, C, D = sym.symbols('mu sigma A B C D')
+res = sym.solve(sym.Eq( (sigma**2 / (1/C)) - ((mu - A/C)**2 / (D / C**2)), 1), sigma)
 #disp.display(res[0])
-sym.Eq(s,res[1])
+sym.Eq(sigma, res[1])
+
+# %% [markdown]
+# simplify:
 
 # %%
-# take positive solution only
-sym.Eq(s,sym.factor(res[1]))
+sym.Eq(sigma, sym.factor(res[1]))
+
+# %% [markdown]
+# check: subtract original form from simplified ("factored") form:
+
+# %%
+res[1] - sym.factor(res[1])
+
+# %% [markdown]
+# gives:
+
+# %%
+sym.factor(res[1] - sym.factor(res[1]))
 
 # %% [markdown]
 # ## 3 numerical example <a class="anchor" id="3"></a>
-# Calculate A, B, C, & D, hence $\sigma$ and $\mu$ for small example
+# Calculate A, B, C, & D, hence $\sigma$ and $\mu$ for a small example of 3 assets
+#
+# sample annualized expected returns, in perone units:
 
 # %%
-# 1 sample expected returns, in perunit
-mu3 = sym.Matrix(np.array([0.1, 0.05, 0.03]).T); # mu3 = sym.Matrix(mu3)
+sPrec = 4 # number of digits of precision to display numerical values
+
+mu3 = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
 mu3
 
+# %% [markdown]
+# cor3: sample correlations:
+
 # %%
-# 2 sample correlations
 cor3 = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
                    [ 0.61229076,  1.,         -0.29579264],
-                   [-0.13636468, -0.29579264,  1.        ]]); cor3
+                   [-0.13636468, -0.29579264,  1.        ]])
+sym.N(cor3, sPrec)
+
+# %% [markdown]
+# vol3: sample vols (stdev):
 
 # %%
-# 3 sample vols (stdev)
-vol3 = sym.Matrix([ 0.05,  0.08,  0.02]) ; vol3
+vol3 = sym.Matrix([ 0.05,  0.08,  0.02]) 
+sym.N(vol3, sPrec)
 
-
-# %%
-from sympy.matrices import matrix_multiply_elementwise as mme
-cov3 = mme(vol3 * vol3.T, cor3)
-cov3
+# %% [markdown]
+# cov3: compose to make covariance matrix:
 
 # %%
-# 5 check: risk = sqrt(variance)
-#vol3chk = sym.sqrt(cov3.diagonal()); sym.Matrix(vol3chk) # OK!
-sym.sqrt(cov3.diagonal())
+cov3 = mme(vol3 * vol3.T, cor3) # mme = element-wise multiply
+sym.N(cov3, sPrec)
+
+# %% [markdown]
+# check that $${variance} = vol^2, diag(cov3) = vol3^2$$ 
 
 # %%
-# 6 check: from covariances back to correlations
-cor3chk = np.reciprocal(vol3).T  * cov3 * np.reciprocal(vol3); cor3chk = sym.Matrix(cor3chk) # OK!
-cor3chk
+sym.diag(*vol3)**2   # how to do sqrt of diagonal matrix in sympy???
+
+# %% [markdown]
+# check: get correlations back from covariance
+#
+# in index subscript form:
+# $$ r_{ij} = \frac{C_{ij}}{C_{ii}*C_{jj}}$$
+#
+# in matrix algebra form: $$ cor3 = vol3^{-1}  \times cov \times  vol3^{-1} $$ 
+#
+# where $$ vol3 = \sqrt{diag(cov3)} $$ as a diagonal matrix
+#
+
+# %%
+oneOverVol = sym.diag(*cov3.diagonal())**(-0.5) # works!!!! using sym.sqrt doesn't evaluate fully
+oneOverVol * cov3 * oneOverVol                  # oneOverVol is diagonal matrix so equal to it's transpose
+
+# %% [markdown]
+# ### 3.1 sample values for calculating sample hyperbolae scalars A,B,C,D 
+#
+# $A,B,C,D$ calculated numerically as variables a,b,c,d:
 
 # %%
 # sample covariance matrix
 cov3B = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
                     [1.52285714, 1.88142857, 1.39309524],
                     [0.90285714, 1.39309524, 1.95809524]])
-cov3B
+sym.N(cov3B, sPrec)
 
 # %%
-# for A,B,C,D calcs
-ones3 = sym.Matrix([1,1,1]).T
+ones3 = sym.Matrix([1,1,1])
 ones3
 
-# %% pycharm={"name": "#%%\n", "is_executing": false}
-cov3Inv = cov3**-1; sym.Matrix(cov3Inv)
-
 # %%
-#LA.cond(cov3Inv) # check condition number of the inverted matrix
+sym.N(cov3B**(-1), sPrec)
 
 # %% [markdown]
+# check condition number of the matrix inverse:
+
+# %%
+sym.N(LA.cond(np.array(cov3B**(-1), dtype=float)), sPrec) 
+
+# %% [markdown]
+# calculate $$A$$ from covariance $$V$$ = cov3, and $$e$$ = mu3
+#
 # $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
 
 # %%
-a = (ones3 * cov3Inv * mu3)[0,0]; a
-ones3
-mu3
-ones3 * cov3Inv
+a = (ones3.T @ cov3B**(-1) @ mu3) # = (mu3.T @ cov3B**(-1) @ ones3.T)
+sym.N(a, sPrec)
 
 # %% [markdown]
-# $ matrix\ B = e^T V^{-1} e $
+# calculate $$B$$ from covariance $$V$$=cov3, and $$e$$=mu3: $ matrix\ B = e^T V^{-1} e $
 
 # %%
-b = (mu3.T * cov3Inv * mu3)[0,0]; b
+b = (mu3.T * cov3B**(-1) * mu3) 
+sym.N(b, sPrec)
 
 # %% [markdown]
-# $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
+# calculate $$C$$ from covariance $$V$$=cov3: $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %%
-c  = ones3 @ cov3Inv @ ones3.T
-c
+c  = ones3.T @ cov3B**(-1) @ ones3
+sym.N(c, sPrec)
 
 # %% [markdown]
-# $ matrix\ D = BC - A^2  $
+# calculate $$D$$ from covariance: $ matrix\ D = BC - A^2  $
 
 # %%
-d = (b*c - a**2); "d=", d
+d = (b*c - a**2); 
+sym.N(d, sPrec)
 
 # %% [markdown]
-# hece using, from above
+# ### 3.2 hence calculate $\sigma$ or $\mu$ 
+# using $A, B, C, D$ calculate $\sigma$ and $\mu$ from each other
 #
 # $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
 # and
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
+#
+# e.g. for $\mu = 0.3$, $\sigma =$ 
+
+# %%
+sgma = ( (d + (0.3*c - a)**2) / (c*d) )**(0.5)
+sym.N(sgma, sPrec)
+
+# %% [markdown]
+# e.g. for $\sigma = 3.086$, $\mu =???$
+
+# %%
+#m = ( (d * (1.351**2 * c - 1))**(1/2) + a ) / c
+((d * ((sgma**2 * c) - sym.Matrix([[1]])) )**(0.5) + a ) / c
+
+
+#sym.N(m, sPrec)
 
 # %%
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
 # %% [markdown]
-# ## 4: Symbolic Plot
+# ## 4: Symbolic Plot <a class="anchor" id="4"></a>
+#
+# sigma vs mu
 
 # %%
 #fsigma = exp( (d + (mu*c-a)**2) / (c*d) ),0.5)
 #fsigma = exp(( (d + (nu*c-a)**2) / (c*d) ) ,1)
 
-# %% [markdown]
-# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
-
 # %%
 #plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
-from sympy.plotting import plot as symplot
-sgma = sym.sqrt( (d + (u*c - a)**2) / (c*d) )
-symplot(sgma, (u, -0.0, 0.3), axis_center=(0.0,0.0), xlabel='$\mu$ mu', ylabel='$\sigma$ sigma')
+
+fsgma = (( (d + (mu*c - a)**2) / (c*d) )**2)[0]
+symplot(fsgma, (mu, -0.0, 0.3), axis_center=(0.0,0.0), xlabel='$\mu$ mu', ylabel='$\sigma$ sigma')
+fsgma
 
 # %% [markdown]
+# mu vs sigma
+#  
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
 # %%
-mu = ( sym.sqrt(d * (s**2 * c - 1) ) + a ) / c; mu
-
-# %%
-symplot(mu,(s,0.0,0.06), axis_center=(0.0,0.04), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
+fmu = (( (d * (sigma**2 * c - sym.Matrix([[1]]) ) )**0.5 + a ) / c)[0]
+symplot(fmu, (sigma, 0.1, 5), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
+fmu
 
 
 # %%
@@ -289,8 +356,7 @@ def fmew(sigma,side):
 #    if            : return ( a + sqrt(d*(c*sigma^2-1)) ) / c
 #    else          : return ( a - sqrt(d*(c*sigma^2-1)) ) / c
 
-for sgm in srange(0.01,0.02,0.001):
-    print sgm, fmew(sgm, 'neg'), fmew(sgm,'pos')
+for sgm in srange(0.01,0.02,0.001): print(sgm, fmew(sgm, 'neg'), fmew(sgm,'pos'))
 
 # %%
 v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'pos')) for x in srange(1.119515028,1.125,1e-6)]
@@ -299,7 +365,7 @@ line(v, figsize=[4,4])
 
 # %% [markdown]
 # ## 5: explcit formula 
-# for small portfolio (3 assets)
+# for small portfolio (3 assets) - covariance $V$
 
 # %%
 # symbolic form of hyperbola in terms of asset variances and returns
@@ -311,7 +377,7 @@ V = sym.Matrix([[s1**2, cv12,  cv13],
                 [cv13,  cv23,  s3**2]]);V
 
 # %%
-V.inv()
+V**(-1)
 
 # %%
 sym.simplify(V.inv()[0,1]-V.inv()[1,0]) # check inverse
@@ -376,7 +442,5 @@ fmuSymb(s) =  ( sqrt(D*(C*s^2-1)) + A) / C; fmuSymb
 # %%
 fmuSymb.diff(s)
 
-# %%
-plot
 
-# %%
+
