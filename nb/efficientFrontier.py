@@ -18,7 +18,7 @@
 # #%autosave 60
 # #%auto
 #typeset_mode(True, display=true)
-print("hello") # python3
+# date today
 
 # %% [markdown]
 # [//]: # (table styling via markdown) 
@@ -46,6 +46,7 @@ print("hello") # python3
 
 # %% pycharm={"is_executing": false}
 # all imports: for symbolic manipulation and for numerical example
+import datetime
 import sympy as sym
 from sympy.matrices import matrix_multiply_elementwise as mme
 from sympy.plotting import plot as symplot
@@ -53,6 +54,11 @@ import IPython.display as disp
 import numpy as np
 from numpy import linalg as LA
 print("imports done")
+now = datetime.datetime.now()
+nowDate = now.isoformat()[:16]
+nowDate = nowDate.replace(':','')
+nowDate
+
 
 # %% [markdown]
 # ## 1 Efficient Frontier Formulae Manipulations <a class="anchor" id="1"></a>
@@ -316,7 +322,7 @@ sym.N(sgma, sPrec)
 
 #sym.N(m, sPrec)
 
-# %% pycharm={"name": "#%%\n"}
+# %% pycharm={"name": "#%%\n", "is_executing": false}
 # mimimum: sigma, mu
 (np.sqrt(1/c), a/c)
 
@@ -347,7 +353,7 @@ symplot(fmu, (sigma, 0.1, 5), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='
 fmu
 
 
-# %%
+# %% pycharm={"is_executing": false}
 def fmew(sigma,side):
     if side=='pos': return ( a + sqrt(d*(c*sigma^2-1)) ) / c
     else          : return ( a - sqrt(d*(c*sigma^2-1)) ) / c
@@ -358,16 +364,17 @@ def fmew(sigma,side):
 
 for sgm in srange(0.01,0.02,0.001): print(sgm, fmew(sgm, 'neg'), fmew(sgm,'pos'))
 
-# %%
+# %% pycharm={"is_executing": false}
 v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'pos')) for x in srange(1.119515028,1.125,1e-6)]
 #v = [(x, fmew(x,'neg')) for x in srange(0.02,0.01,-0.001)] + [(x, fmew(x,'pos')) for x in srange(0.01,0.02,0.001)]
 line(v, figsize=[4,4])
 
 # %% [markdown]
-# ## 5: explcit formula 
+# ## 5: explcit formula <a class="anchor" id="5"></a>
 # for small portfolio (3 assets) - covariance $V$
 
 # %% pycharm={"is_executing": false}
+
 # symbolic form of hyperbola in terms of asset variances and returns
 u,s,A,B,C,D,E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2 = sym.symbols(
     'u s A B C D E  s1 s2 s3 cv12 cv13 cv23  r0 r1 r2')
@@ -376,57 +383,69 @@ V = sym.Matrix([[s1**2, cv12,  cv13],
                 [cv12,  s2**2, cv23],
                 [cv13,  cv23,  s3**2]]);V
 
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# just for fun, inverse of covariance matrix $V$
+
 # %% pycharm={"is_executing": false}
 V**(-1)
 
-# %%
-sym.simplify(V.inv()[0,1]-V.inv()[1,0]) # check inverse
+# %% [markdown] pycharm={"name": "#%% md\n", "is_executing": false}
+# check multiply: $V \times V^{-1}$
 
-# %%
+# %% pycharm={"is_executing": false}
+sym.simplify(V.inv() @ V) # check inverse
+
+# %% pycharm={"is_executing": false}
 #sym.ask(sym.Q.symmetric(V.inv()))
 
-# %%
-vi00,vi11,vi22, vi01,vi02,vi12 = sym.symbols('vi00,vi11,vi22, vi01,vi02,vi12')
+# %% pycharm={"is_executing": false}
+vi00,vi11,vi22, vi01,vi02,vi12 = sym.symbols('vi00, vi11, vi22, vi01, vi02, vi12')
 Vi = sym.Matrix([[vi00, vi01, vi02],
-             [vi01, vi11, vi12],
-             [vi02, vi12, vi22]]);Vi
+                 [vi01, vi11, vi12],
+                 [vi02, vi12, vi22]])
+Vi
 
-# %%
-E = sym.Matrix([r0,r1,r2]).T;E
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# returns $E$ =
 
-# %% [markdown]
-# $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $$
-
-# %%
-# A
-#A = (ones3 * Vi * E.T)[0,0]; A
-sym.Matrix(ones3.T) @ Vi @ E.T
+# %% pycharm={"is_executing": false}
+E = sym.Matrix([r0,r1,r2])
+E
 
 # %% [markdown]
-# $ B = e^T V^{-1} e $
+# $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} =$$
 
-# %%
+# %% pycharm={"is_executing": false}
+#A = ones3.T @ Vi.inv() # @ E.T
+#A
+E.T
+
+# %% [markdown]
+# $ B = e^T V^{-1} e =$
+
+# %% pycharm={"is_executing": false}
 # B
-B = (E.T * Vi * E)[0,0]; B
+B = (E.T * Vi * E)
+B
 
 # %% [markdown]
-# $$ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
+# $$ C = \mathbf{1}^T V^{-1} \mathbf{1} = $$
 
-# %%
+# %% pycharm={"is_executing": false}
 # C
 C = (ones3.T * Vi * ones3)[0,0]; C
 
 # %% [markdown]
 # $ D = BC - A**2  $
 
-# %%
+# %% pycharm={"is_executing": false}
 # D
 D = (B*C - A**2); D
 
-# %%
+# %% pycharm={"is_executing": false}
 fsigmaSymb(u) = sqrt(D+(u*C-A)^2/(C*D)); fsigmaSymb
 
-# %%
+# %% pycharm={"is_executing": false}
 fmuSymb(s) =  ( sqrt(D*(C*s^2-1)) + A) / C; fmuSymb
 
 # %% [markdown]
@@ -439,7 +458,7 @@ fmuSymb(s) =  ( sqrt(D*(C*s^2-1)) + A) / C; fmuSymb
 # \mbox{vi}_{22}
 # \end{align}
 
-# %% pycharm={"name": "#%%\n"}
+# %% pycharm={"name": "#%%\n", "is_executing": false}
 fmuSymb.diff(s)
 
 
