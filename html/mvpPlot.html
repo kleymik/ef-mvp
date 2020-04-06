@@ -24,6 +24,8 @@ var corrMtx;
 var assetDataTbl;
 var assetCount = 0;
 
+function gd(x) { return x.__data__; }
+
 // asset correlations matrix
 d3.json("data/assetCorrsData.json",
         function(error, json) { inputCorrMtx = json.corr.mtx; }); // alert(json);
@@ -49,13 +51,6 @@ d3.tsv("data/scatterData4.tsv",
            }
 
            // plot axes
-           var x     = d3.scale.linear().range([0, width]);
-           var xAxis = d3.svg.axis().scale(x).orient("bottom");
-           x.domain(d3.extent(data, function(d) { return d.oneYrRisk; })).nice();
-           
-           var y     = d3.scale.linear().range([height, 0]);
-           var yAxis = d3.svg.axis().scale(y).orient("left");
-           y.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
            
            var color = d3.scale.category10();
            
@@ -64,7 +59,10 @@ d3.tsv("data/scatterData4.tsv",
                .attr("height", height + margin.top  + margin.bottom)
                .append("g")
                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-           
+
+           var x     = d3.scale.linear().range([0, width]);
+           x.domain(d3.extent(data, function(d) { return d.oneYrRisk; })).nice();
+           var xAxis = d3.svg.axis().scale(x).orient("bottom");
            svgc.append("g").attr("class", "x axis")
                .attr("transform", "translate(0," + height + ")")
                .call(xAxis)
@@ -74,7 +72,10 @@ d3.tsv("data/scatterData4.tsv",
                .attr("y", -6)
                .style("text-anchor", "end")
                .text("1 Year Risk %");
-           
+
+           var y     = d3.scale.linear().range([height, 0]);
+           y.domain(d3.extent(data, function(d) { return d.oneYrReturn; })).nice();
+           var yAxis = d3.svg.axis().scale(y).orient("left");
            svgc.append("g").attr("class", "y axis")
                .call(yAxis)
                .append("text")
@@ -105,17 +106,6 @@ d3.tsv("data/scatterData4.tsv",
            //Create svg group element
            // var g = svg.append("g").attr("transform", function(d, i) { return "translate(0,0)"; });
            
-           // The data for our line
-           // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
-           var sampleRtns = [{ "x": 0.01, "y": 0},
-                             { "x": 0.02, "y": 0},
-                             { "x": 0.03, "y": 0},
-                             { "x": 0.04, "y": 0},
-                             { "x": 0.05, "y": 0},
-                             { "x": 0.06, "y": 0},
-                             { "x": 0.07, "y": 0},
-                             { "x": 0.08, "y": 0}];
-
            
            // Create and append straightline element into svg group
            svgc.append("line")
@@ -181,19 +171,7 @@ d3.tsv("data/scatterData4.tsv",
                            .attr("cx", function(e) { return x(e.oneYrRisk);   })
                            .attr("cy", function(e) { return y(e.oneYrReturn); });
 
-
-                       pfFrontierPathElem = d3.selectAll("path.frontier")                              // get the hyperbola path graphical thingy
-                       pfFrontierPathElem[0].forEach(function(x) {                                           // update their data
-                           sv = calcPfRtnFromRisk(corrMtx, asstRsks, asstRtns, asstWghts, numAssts, sampleRtns)  
-                           // now redraw the hyperbola
-                           newWght = x.__data__.assetWeight + deltaWght; 
-                           x.__data__.assetWeight= Math.min(Math.max(newWght,  3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
-
-                           d3.select('hypb.p')                                                            // re-assert to trigger update
-                               .attr("cx", function(e) { return x(e.oneYrRisk);   })
-                               .attr("cy", function(e) { return y(e.oneYrReturn); });
-                       })
-                   }
+                  }
 
                });
 
@@ -201,7 +179,7 @@ d3.tsv("data/scatterData4.tsv",
            // 
            svgc.selectAll(".dot")
                .data(data)                                                                       // document.querySelector("circle").__data__
-               .enter().append('circle')                                                        //       circle.each(function(d) { d.element = this; }) 
+               .enter().append('circle')                                                         // circle.each(function(d) { d.element = this; }) 
                .attr("pfMemb",  function(d) { return (d.pfMemb);          })
                .attr("class",   function(d) { return (d.assetId);         })
                .attr("myid",    function(d) { return (d.assetId);         })
@@ -214,15 +192,28 @@ d3.tsv("data/scatterData4.tsv",
                .call(circleDrag);
 
            // Create and append hyperbolic line element into svg group
+           // this will not change when the asset weights change
+           // it will only change when the correlations change
            //The line SVG Path we draw
-           var lineData = [{ "x": 400, "y": 450},
-                           { "x": 300, "y": 440},
-                           { "x": 200, "y": 430},
-                           { "x": 40,  "y": 400},
-                           { "x": 200, "y": 270},
-                           { "x": 300, "y": 200},
-                           { "x": 400, "y": 100},
-                           { "x": 500, "y": 0}];
+                      // The data for our line
+           // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
+
+           var sampleRtns = [ 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08];
+           var lineData = calcPfRiskFromPfRtns(corrMtx,
+                                     assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrRisk   } ),
+                                     assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrReturn } ),
+                                     sampleRtns);
+           // pfFrontierPathElem = d3.selectAll('path.frontier')               // get the hyperbola path graphical thingy
+
+           // var lineData = [{ "x": 400, "y": 450},
+           //                 { "x": 300, "y": 440},
+           //                 { "x": 200, "y": 430},
+           //                 { "x": 40,  "y": 400},
+           //                 { "x": 200, "y": 270},
+           //                 { "x": 300, "y": 200},
+           //                 { "x": 400, "y": 100},
+           //                 { "x": 500, "y": 0}];
+           
            var lineFunction = d3.svg.line()             // This is the accessor function we talked about above
                .x(function(d) { return d.x; })
                .y(function(d) { return d.y; })
