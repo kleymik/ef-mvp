@@ -1,9 +1,20 @@
-{ "data": [{ "oneYrReturn":5.1, "oneYrRisk":3.5,  "assetWeight":14,  "assetClass":"credit",    "assetId":"c1", "pfMemb":"1" },
-	   { "oneYrReturn":7.0, "oneYrRisk":4.2,  "assetWeight":47,  "assetClass":"equities",  "assetId":"e1", "pfMemb":"1" },
-	   { "oneYrReturn":0.9, "oneYrRisk":1.1,  "assetWeight":39,  "assetClass":"govys",     "assetId":"g1", "pfMemb":"1" },
-	   { "oneYrReturn":1.9, "oneYrRisk":5.1,  "assetWeight":39,  "assetClass":"credit",    "assetId":"c1", "pfMemb":"1" },
-	   { "oneYrReturn":0.0, "oneYrRisk":0.0,  "assetWeight":100, "assetClass":"portfolio", "assetId":"p",  "pfMemb":"0" },
-	   { "oneYrReturn":0.0, "oneYrRisk":0.0,  "assetWeight":1,   "assetClass":"zerozero",  "assetId":"z",  "pfMemb":"0" },
-	   { "oneYrReturn":9.0, "oneYrRisk":9.0,  "assetWeight":1,   "assetClass":"maxmax",    "assetId":"m",  "pfMemb":"0" }]
+{ "pfData": [{ "oneYrReturn":5.1, "oneYrRisk":3.5,  "assetWeight":14,  "assetClass":"credit",    "assetId":"c1", "pfMemb":1 },
+	     { "oneYrReturn":7.0, "oneYrRisk":4.2,  "assetWeight":47,  "assetClass":"equities",  "assetId":"e1", "pfMemb":1 },
+	     { "oneYrReturn":0.9, "oneYrRisk":1.1,  "assetWeight":39,  "assetClass":"govys",     "assetId":"g1", "pfMemb":1 },
+	     { "oneYrReturn":1.9, "oneYrRisk":5.1,  "assetWeight":39,  "assetClass":"credit",    "assetId":"c1", "pfMemb":1 },
+	     { "oneYrReturn":0.0, "oneYrRisk":0.0,  "assetWeight":100, "assetClass":"portfolio", "assetId":"p",  "pfMemb":0 },
+	     { "oneYrReturn":0.0, "oneYrRisk":0.0,  "assetWeight":1,   "assetClass":"zerozero",  "assetId":"z",  "pfMemb":0 },
+	     { "oneYrReturn":9.0, "oneYrRisk":9.0,  "assetWeight":1,   "assetClass":"maxmax",    "assetId":"m",  "pfMemb":0 }],
+    "corr": { "ordering":["c1", "e1", "g1", "c2", "e2", "g2"],
+              "comment":"Asset Ordering should correspond to ordering in pfData above",
+  	      "mtx":   [[1.0,	 0.5,	 0.4,	0.2,	 0.1,	0.8],
+	                [0.5,	 1.0,	-0.8,	0.2,	-0.2,	0.6],
+                        [0.4,	-0.8,	 1.0,	0.2,	-0.3,	0.5],
+	                [0.2,	 0.2,	 0.2,	1.0,	 0.4,	0.3],
+	                [0.1,	-0.2,	-0.3,	0.4,	 1.0,	0.7],
+ 	                [0.8,	 0.6,	 0.5,	0.3,	 0.7,	1.0]]
+	   }
 }
+
+
 
