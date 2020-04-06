@@ -44,6 +44,9 @@
 #
 # 5 [Explicit formulae - for 3 assets](#5)
 
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# do imports, keep variables in a dict as a workspace
+
 # %% pycharm={"is_executing": false}
 # all imports: for symbolic manipulation and for numerical example
 import datetime
@@ -54,10 +57,10 @@ import IPython.display as disp
 import numpy as np
 from numpy import linalg as LA
 print("imports done")
-now = datetime.datetime.now()
-nowDate = now.isoformat()[:16]
-nowDate = nowDate.replace(':','')
-nowDate
+
+ws = {}
+ws['date'] = datetime.datetime.now().isoformat()[:16].replace(':','')
+ws
 
 
 # %% [markdown]
@@ -161,142 +164,152 @@ nowDate
 # %% [markdown]
 # ## 2 manipulate equation using sympy - solve for $\sigma$ <a class="anchor" id="2"></a>
 #
-# take positive solution only:
+# take positive solution only
 
-# %% pycharm={"is_executing": false}
+# %% pycharm={"name": "#%%\n", "is_executing": false}
 mu, sigma, A, B, C, D = sym.symbols('mu sigma A B C D')
-res = sym.solve(sym.Eq( (sigma**2 / (1/C)) - ((mu - A/C)**2 / (D / C**2)), 1), sigma)
-#disp.display(res[0])
-sym.Eq(sigma, res[1])
+ws['sigamEqn'] = sym.solve(sym.Eq( (sigma**2 / (1/C)) - ((mu - A/C)**2 / (D / C**2)), 1) , sigma)[1] # [1]=> +ve soln
+ws['sigamEqn']
 
 # %% [markdown] pycharm={"name": "#%% md\n", "is_executing": false}
 # simplify:
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-sym.Eq(sigma, sym.factor(res[1]))
+sym.factor(sym.Eq(sigma, ws['sigamEqn']))
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # check: subtract original form from simplified ("factored") form:
 
 # %% pycharm={"name": "#%% \n", "is_executing": false}
-res[1] - sym.factor(res[1])
+ws['sigamEqn'] - sym.factor(ws['sigamEqn'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # gives:
 
 # %% pycharm={"name": "#%% \n", "is_executing": false}
-sym.factor(res[1] - sym.factor(res[1]))
+sym.factor(ws['sigamEqn'] - sym.factor(ws['sigamEqn']))
 
 # %% [markdown]
 # ## 3 numerical example <a class="anchor" id="3"></a>
-# Calculate A, B, C, & D, hence $\sigma$ and $\mu$ for a small example of 3 assets
+# Calculate A, B, C, & D, hence $\sigma$ and $\mu$, for a small example of 3 assets
 #
 # sample annualized expected returns, in perone units:
 
 # %% pycharm={"is_executing": false}
-sPrec = 4 # number of digits of precision to display numerical values
+ws['prec'] = 4 # number of digits of precision to display numerical values
 
-mu3 = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
-mu3
+ws['mu3'] = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
+ws['mu3']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# cor3: sample correlations:
+# *cor3*: sample correlations:
 
 # %% pycharm={"is_executing": false}
-cor3 = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
-                   [ 0.61229076,  1.,         -0.29579264],
-                   [-0.13636468, -0.29579264,  1.        ]])
-sym.N(cor3, sPrec)
+ws['cor3'] = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
+                         [ 0.61229076,  1.,         -0.29579264],
+                         [-0.13636468, -0.29579264,  1.        ]])
+sym.N(ws['cor3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# vol3: sample vols (stdev):
+# *vol3*: sample vols (stdev):
 
 # %% pycharm={"is_executing": false}
-vol3 = sym.Matrix([ 0.05,  0.08,  0.02]) 
-sym.N(vol3, sPrec)
+ws['vol3'] = sym.Matrix([ 0.05,  0.08,  0.02]) 
+sym.N(ws['vol3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# cov3: compose to make covariance matrix:
+# *cov3*: compose to make covariance matrix:
 
 # %% pycharm={"is_executing": false}
-cov3 = mme(vol3 * vol3.T, cor3) # mme = element-wise multiply
-sym.N(cov3, sPrec)
+ws['cov3'] = mme(ws['vol3'] * ws['vol3'].T, ws['cor3']) # mme = element-wise multiply
+sym.N(ws['cov3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# check that $${variance} = vol^2, diag(cov3) = vol3^2$$ 
+# check that $${variance} = vol^2$$, $$diag(cov3) = vol3^2$$ 
 
 # %% pycharm={"name": "#%% \n", "is_executing": false}
-sym.diag(*vol3)**2   # how to do sqrt of diagonal matrix in sympy???
+sym.diag(*ws['vol3'])**2   # how to do sqrt of diagonal matrix in sympy???
 
 # %% [markdown] pycharm={"is_executing": false, "name": "#%% md\n"}
 # check: get correlations back from covariance
 #
 # in index subscript form:
-# $$ r_{ij} = \frac{C_{ij}}{C_{ii}*C_{jj}}$$
+# $$ r_{ij} = \frac{c_{ij}}{c_{ii}*c_{jj}}$$
 #
 # in matrix algebra form: $$ cor3 = vol3^{-1}  \times cov \times  vol3^{-1} $$ 
 #
 # where $$ vol3 = \sqrt{diag(cov3)} $$ as a diagonal matrix
-#
+
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# *vol3*:
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-oneOverVol = sym.diag(*cov3.diagonal())**(-0.5) # works!!!! using sym.sqrt doesn't evaluate fully
-oneOverVol * cov3 * oneOverVol                  # oneOverVol is diagonal matrix so equal to it's transpose
+ws['oneOverVol'] = sym.diag(*ws['cov3'].diagonal())**(-0.5) # works!!!! using sym.sqrt doesn't evaluate fully
+ws['oneOverVol'] * ws['cov3'] * ws['oneOverVol']            # oneOverVol is diagonal matrix so it's equal to its transpose
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # ### 3.1 sample values for calculating sample hyperbolae scalars A,B,C,D 
 #
 # $A,B,C,D$ calculated numerically as variables a,b,c,d:
 
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# try some new covariance, *cov3N*:
+
 # %% pycharm={"is_executing": false}
 # sample covariance matrix
-cov3B = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
-                    [1.52285714, 1.88142857, 1.39309524],
-                    [0.90285714, 1.39309524, 1.95809524]])
-sym.N(cov3B, sPrec)
-
-# %% pycharm={"is_executing": false}
-ones3 = sym.Matrix([1,1,1])
-ones3
-
-# %% pycharm={"name": "#%%\n", "is_executing": false}
-sym.N(cov3B**(-1), sPrec)
+ws['cov3N'] = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
+                          [1.52285714, 1.88142857, 1.39309524],
+                          [0.90285714, 1.39309524, 1.95809524]])
+sym.N(ws['cov3N'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# check condition number of the matrix inverse:
+# vector of 3 ones:
 
 # %% pycharm={"is_executing": false}
-sym.N(LA.cond(np.array(cov3B**(-1), dtype=float)), sPrec) 
+ws['ones3'] = sym.Matrix([1,1,1])
+ws['ones3']
+
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# inverse of *cov3N*
+
+# %% pycharm={"name": "#%%\n", "is_executing": false}
+sym.N(ws['cov3N']**(-1), ws['prec'])
+
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# check condition number of *cov3N* inverse:
+
+# %% pycharm={"is_executing": false}
+sym.N(LA.cond(np.array(ws['cov3B']**(-1), dtype=float)), ws['prec']) 
 
 # %% [markdown]
-# calculate $$A$$ from covariance $$V$$ = cov3, and $$e$$ = mu3
+# calculate $A$ from covariance $V = cov3$, and $e = mu3$
 #
 # $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
 
 # %% pycharm={"is_executing": false}
-a = (ones3.T @ cov3B**(-1) @ mu3) # = (mu3.T @ cov3B**(-1) @ ones3.T)
-sym.N(a, sPrec)
+ws['a'] = ws['ones3'].T @ ws['cov3N']**(-1) @ ws['mu3'] # = (mu3.T @ cov3B**(-1) @ ones3.T)
+sym.N(ws['a'], ws['prec'])
 
 # %% [markdown]
 # calculate $$B$$ from covariance $$V$$=cov3, and $$e$$=mu3: $ matrix\ B = e^T V^{-1} e $
 
 # %% pycharm={"is_executing": false}
-b = (mu3.T * cov3B**(-1) * mu3) 
-sym.N(b, sPrec)
+ws['b'] = ws['mu3'].T @ ws['cov3B']**(-1) @ ws['mu3'] 
+sym.N(ws['b'], ws['prec'])
 
 # %% [markdown]
 # calculate $$C$$ from covariance $$V$$=cov3: $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %% pycharm={"is_executing": false}
-c  = ones3.T @ cov3B**(-1) @ ones3
-sym.N(c, sPrec)
+ws['c']  = ws['ones3'].T @ ws['cov3B']**(-1) @ ws['ones3']
+sym.N(ws['c'], ws['prec'])
 
 # %% [markdown]
 # calculate $$D$$ from covariance: $ matrix\ D = BC - A^2  $
 
 # %% pycharm={"is_executing": false}
-d = (b*c - a**2); 
-sym.N(d, sPrec)
+ws['d'] = ws['b'] * ws['c'] - ws['a']**2
+sym.N(ws['d'], ws['prec'])
 
 # %% [markdown]
 # ### 3.2 hence calculate $\sigma$ or $\mu$ 
@@ -309,7 +322,7 @@ sym.N(d, sPrec)
 # e.g. for $\mu = 0.3$, $\sigma =$ 
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-sgma = ( (d + (0.3*c - a)**2) / (c*d) )**(0.5)
+ws['sgma'] = ( (ws['d'] + (0.3*ws['c'] - ws['a'])**2) / (ws['c']*ws['d']) )**(0.5)
 sym.N(sgma, sPrec)
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
@@ -317,14 +330,14 @@ sym.N(sgma, sPrec)
 
 # %% pycharm={"is_executing": false}
 #m = ( (d * (1.351**2 * c - 1))**(1/2) + a ) / c
-((d * ((sgma**2 * c) - sym.Matrix([[1]])) )**(0.5) + a ) / c
+((ws['d'] * ((ws['sgma']**2 * ws['c']) - sym.Matrix([[1]])) )**(0.5) + ws['a'] ) / ws['c']
 
 
 #sym.N(m, sPrec)
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
 # mimimum: sigma, mu
-(np.sqrt(1/c), a/c)
+(np.sqrt(1/ws['c']), ws['a']/ws['c'])
 
 # %% [markdown]
 # ## 4: Symbolic Plot <a class="anchor" id="4"></a>
@@ -338,9 +351,9 @@ sym.N(sgma, sPrec)
 # %% pycharm={"is_executing": false}
 #plot(fsigma,(mu,0.03,0.06), figsize=[4,4], legend_label='$\sigma(\mu)$') # rotated version
 
-fsgma = (( (d + (mu*c - a)**2) / (c*d) )**2)[0]
-symplot(fsgma, (mu, -0.0, 0.3), axis_center=(0.0,0.0), xlabel='$\mu$ mu', ylabel='$\sigma$ sigma')
-fsgma
+ws['fsgma'] = ( ( (ws['d'] + (ws['mu3']*ws['c'] - ws['a'])**2) / (ws['c'] * ws['d']) )**2)[0]
+symplot(ws['fsgma'], (mu, -0.0, 0.3), axis_center=(0.0,0.0), xlabel='$\mu$ mu', ylabel='$\sigma$ sigma')
+ws['fsgma']
 
 # %% [markdown]
 # mu vs sigma
@@ -348,21 +361,21 @@ fsgma
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
 # %% pycharm={"is_executing": false}
-fmu = (( (d * (sigma**2 * c - sym.Matrix([[1]]) ) )**0.5 + a ) / c)[0]
-symplot(fmu, (sigma, 0.1, 5), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
-fmu
+ws['fmu'] = (( (ws['d'] * (sigma**2 * ws['c'] - sym.Matrix([[1]]) ) )**0.5 + ws['a'] ) / ws['c'])[0]
+symplot(ws['fmu'], (sigma, 0.1, 5), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
+ws['fmu']
 
 
 # %% pycharm={"is_executing": false}
-def fmew(sigma,side):
-    if side=='pos': return ( a + sqrt(d*(c*sigma^2-1)) ) / c
-    else          : return ( a - sqrt(d*(c*sigma^2-1)) ) / c
+def fmew(sigma, side, w):
+    if side=='pos': return ( w['a'] + sqrt(w['d'] * (w['c'] * sigma^2-1)) ) / w['c']
+    else          : return ( w['a'] - sqrt(w['d'] * (w['c'] * sigma^2-1)) ) / w['c']
 
 #def fmew2(sigma):
 #    if            : return ( a + sqrt(d*(c*sigma^2-1)) ) / c
 #    else          : return ( a - sqrt(d*(c*sigma^2-1)) ) / c
 
-for sgm in srange(0.01,0.02,0.001): print(sgm, fmew(sgm, 'neg'), fmew(sgm,'pos'))
+for sgm in srange(0.01,0.02,0.001): print(sgm, fmew(sgm, 'neg', ws), fmew(sgm,'pos', ws))
 
 # %% pycharm={"is_executing": false}
 v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'pos')) for x in srange(1.119515028,1.125,1e-6)]
@@ -370,21 +383,25 @@ v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'p
 line(v, figsize=[4,4])
 
 # %% [markdown]
-# ## 5: explcit formula <a class="anchor" id="5"></a>
+# ## 5: Explcit formula <a class="anchor" id="5"></a>
+#
 # for small portfolio (3 assets) - covariance $V$
+#
+# symbolic form of hyperbola in terms of asset covariances and returns:
+#
+# (note symmetric entries)
 
 # %% pycharm={"is_executing": false}
-
-# symbolic form of hyperbola in terms of asset variances and returns
-u,s,A,B,C,D,E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2 = sym.symbols(
-    'u s A B C D E  s1 s2 s3 cv12 cv13 cv23  r0 r1 r2')
+u,s,A,B,C,D,E, s1,s2,s3, cv12,cv13,cv23, r0,r1,r2 = \
+    sym.symbols('u s A B C D E  s1 s2 s3 cv12 cv13 cv23  r0 r1 r2')
 
 V = sym.Matrix([[s1**2, cv12,  cv13],
                 [cv12,  s2**2, cv23],
-                [cv13,  cv23,  s3**2]]);V
+                [cv13,  cv23,  s3**2]])
+V
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# just for fun, inverse of covariance matrix $V$
+# just for fun, inverse of covariance matrix $V$:
 
 # %% pycharm={"is_executing": false}
 V**(-1)
@@ -392,11 +409,17 @@ V**(-1)
 # %% [markdown] pycharm={"name": "#%% md\n", "is_executing": false}
 # check multiply: $V \times V^{-1}$
 
-# %% pycharm={"is_executing": false}
-sym.simplify(V.inv() @ V) # check inverse
+# %% pycharm={"name": "#%%\n", "is_executing": false}
+sym.MatMul(V, V.inv(),doit=False) 
+
+# %% [markdown] pycharm={"name": "#%% md\n"}
+# **=** 
+
+# %% pycharm={"name": "#%%\n", "is_executing": false}
+sym.simplify(V @ V.inv())
 
 # %% pycharm={"is_executing": false}
-#sym.ask(sym.Q.symmetric(V.inv()))
+#sym.ask(sym.Q.symmetric(V.inv())) # only avaulable in SageMath/Cocalc?
 
 # %% pycharm={"is_executing": false}
 vi00,vi11,vi22, vi01,vi02,vi12 = sym.symbols('vi00, vi11, vi22, vi01, vi02, vi12')
@@ -406,10 +429,10 @@ Vi = sym.Matrix([[vi00, vi01, vi02],
 Vi
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# returns $E$ =
+# returns: $E$ =
 
 # %% pycharm={"is_executing": false}
-E = sym.Matrix([r0,r1,r2])
+E = sym.Matrix([r0,r1,r2]).T
 E
 
 # %% [markdown]
@@ -417,8 +440,7 @@ E
 
 # %% pycharm={"is_executing": false}
 #A = ones3.T @ Vi.inv() # @ E.T
-#A
-E.T
+ws['ones3'].T @ V.inv() @ E.T 
 
 # %% [markdown]
 # $ B = e^T V^{-1} e =$
