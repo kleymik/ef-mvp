@@ -142,11 +142,11 @@ if (1==1) {
            // Create and append hyperbolic line element into svg group
            // this will not change when the asset weights change
            // it will only change when the correlations change
-           //The line SVG Path we draw
-                      // The data for our line
+           // The line SVG Path we draw
+           // The data for our line
            // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
 
-           var sampleRtns = [ 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08];
+           var sampleRtns = [ 0.1, 0.3, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]; // .map(function(x) { return x*100.0 });
            var lineData = calcPfRiskFromPfRtns(corrMtx,
                                      assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrRisk   } ),
                                      assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrReturn } ),
