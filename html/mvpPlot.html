@@ -118,15 +118,12 @@ d3.json("data/assetRskRtns.json",
                      d3.select('circle.p')                                                          // re-assert to trigger update
                          .attr("cx", function(e) { return x(e.oneYrRisk);   })
                          .attr("cy", function(e) { return y(e.oneYrReturn); });
-
                 }
-
              });
 
          // SVG Graphical Element: circle: one circle for each asset + one for the whole portfolio that is the sum of the size
-         // 
          svgc.selectAll(".dot")
-             .data(assetDataTbl)                                                                       // document.querySelector("circle").__data__
+             .data(assetDataTbl)                                                               // document.querySelector("circle").__data__
              .enter().append('circle')                                                         // circle.each(function(d) { d.element = this; }) 
              .attr("pfMemb",  function(d) { return (d.pfMemb);          })
              .attr("class",   function(d) { return (d.assetId);         })
@@ -139,56 +136,42 @@ d3.json("data/assetRskRtns.json",
              .style("stroke-width", 2)
              .call(circleDrag);
 
+
          // Create and append hyperbolic line element into svg group
          // this will not change when the asset weights change
          // it will only change when the correlations change
          // The line SVG Path we draw
          // The data for our line
          // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
-
-         var sampleRtns = [ 0.1, 0.3, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]; // .map(function(x) { return x*100.0 });
          var lineData = calcPfRiskFromPfRtns(corrMtx,
                                    assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrRisk   } ),
                                    assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrReturn } ),
-                                   sampleRtns);
-         // pfFrontierPathElem = d3.selectAll('path.frontier')               // get the hyperbola path graphical thingy
-
-         // var lineData = [{ "x": 400, "y": 450},
-         //                 { "x": 300, "y": 440},
-         //                 { "x": 200, "y": 430},
-         //                 { "x": 40,  "y": 400},
-         //                 { "x": 200, "y": 270},
-         //                 { "x": 300, "y": 200},
-         //                 { "x": 400, "y": 100},
-         //                 { "x": 500, "y": 0}];
-
+                                   [ 0.0001, 0.001, 0.01, 0.1, 0.3, 0.5, 1, 2, 3, 4, 5]);
          var lineFunction = d3.svg.line()             // This is the accessor function we talked about above
-             .x(function(d) { return d.x; })
-             .y(function(d) { return d.y; })
+             .x(function(d) { return d.rtn; })
+             .y(function(d) { return d.rsk; })
              .interpolate("cardinal");  //linear basis
          svgc.append("path")
              .attr("d", lineFunction(lineData))
              .attr("pfMemb",   0)
-             .attr("class",   "frontier")             // search for this when using selectAll()
+             .attr("class",   "frontier")             // search for this when using selectAll() d3.selectAll('path.frontier')  
              .attr("myid",    123456)
              .attr("lineData", lineData)              // the control points to get an svg "cardinal" to approximnate a hyperbola
              .attr("stroke", "blue")
              .attr("stroke-width", 4)
              .attr("fill", "none");         
 
-         // put legend in top right corner
-         var legend = svgc.selectAll(".legend")
+
+         var legend = svgc.selectAll(".legend")                              // put legend in top right corner
              .data(color.domain())
              .enter().append("g")
              .attr("class", "legend")
              .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
          legend.append("rect")
              .attr("x", width - 18)
              .attr("width",  18)
              .attr("height", 18)
              .style("fill", color);
-
          legend.append("text")
              .attr("x", width - 24)
              .attr("y", 9)
