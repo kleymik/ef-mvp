@@ -31,7 +31,7 @@ test2x2();
 function gdata(x) { return x.__data__; }   // a common accessor
 
 
-d3.json("data/assetRskRtns.json",
+d3.json("data/portfolioAssetsAndChracteristics_4.json",
       function(error, jData) {
          assetDataTbl = jData.pfData;                      // export data into enclosing scope
          assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 }; }); // count up the number of assets in the portfolio to clip the correlation matrix
