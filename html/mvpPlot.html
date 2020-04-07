@@ -25,7 +25,7 @@ var assetDataTbl;
 var assetCount = 0;
 
 // some testing of the mvp.js functions
-test2x2();
+// test2x2();
 // test3x3();
 
 function gdata(x) { return x.__data__; }   // a common accessor
@@ -33,11 +33,11 @@ function gdata(x) { return x.__data__; }   // a common accessor
 
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
       function(error, jData) {
-         assetDataTbl = jData.pfData;                      // export data into enclosing scope
+         assetDataTbl = jData.pfData;                                                   // export data into enclosing scope
          assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 }; }); // count up the number of assets in the portfolio to clip the correlation matrix
 
          inputCorrMtx = jData.corr.mtx;            
-         corrMtx = Array(assetCount);     // slice out assetCount X assetCount matrix from input Matrix
+         corrMtx = Array(assetCount);                                                   // slice out assetCount X assetCount matrix from input Matrix
          for(i=0; i<assetCount; i++){
              corrMtx[i] = Array(assetCount);
              for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j]; }
@@ -47,7 +47,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
          var color = d3.scale.category10();
 
-         var svgc = d3.select("body").append("svg")                 // svgc = svg Container
+         var svgc = d3.select("body").append("svg")                                     // svgc = svg Container
              .attr("width",  width  + margin.left + margin.right)
              .attr("height", height + margin.top  + margin.bottom)
              .append("g")
@@ -89,49 +89,45 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("stroke-width", 8);
          //     .append("text");
 
-         var circleDrag = d3.behavior.drag()  // drag on a circle
+         var circleDrag = d3.behavior.drag()                                                        // drag on a circle
              .on("drag", function(d,i) {
                  if (d.assetId!="p") {                                                              // can't stretch the 100% weight portfolio 
-                     deltaWght = (d3.event.dx+d3.event.dy)/4;
+                     deltaWght = (d3.event.dx+d3.event.dy) / 4;
                      console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
                      pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // get just the assets in portfolio, not other objects
                      numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
                      pfAssetElems[0].forEach(function(e) {                                          // update their data 
-                         sameThing = (d.assetId==e.getAttribute("myid"));                           // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
-                         if (sameThing) { 
-                             newWght = gdata(e).assetWeight + deltaWght; 
-                             gdata(e).assetWeight= Math.min(Math.max(newWght,  3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
-                         } else { 
-                             newWght = gdata(e).assetWeight - deltaWght/numOtherAssets; 
-                             gdata(e).assetWeight = Math.min(Math.max(newWght, 3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
-                         }  // down weight the rest equally
+                         if (d.assetId==e.getAttribute("myid")) {                                   // sameThing = (x.__data__.assetId==x.getAttribute("myid"));  
+                             gdata(e).assetWeight = Math.min(Math.max(gdata(e).assetWeight + deltaWght,  3), 97);                // 3% < weight < 97% to avoid numerical inaccuracy 
+                         } else {                                                                   // downweight the rest equally
+                             gdata(e).assetWeight = Math.min(Math.max(gdata(e).assetWeight - deltaWght/numOtherAssets, 3), 97);  // 3% < weight < 97% to avoid numerical inaccuracy 
+                         }  
                      });
-
-                     pfAssetElems.attr("r", function(e){ return Math.sqrt(e.assetWeight * wghtScaling)}) // update their radii
+                                                                                                         
+                     pfAssetElems.attr("r", function(e){ return Math.sqrt(e.assetWeight * wghtScaling)}) // update radii of all portfolio's assets
 
                      asstWghts = pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling } );
                      asstRtns  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn             } );
                      asstRsks  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk               } );
 
-                     rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);
-
-                     pfData = gdata(d3.select('circle.p')[0][0]);                                 // get all the circles
+                     rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);                  // compute new total portfolio risk & return
+                     pfData = gdata(d3.select('circle.p')[0][0]);                                   // get the total portfolio circle
                      pfData.oneYrRisk   = rr.rsk * wghtScaling;
-                     pfData.oneYrReturn = rr.rtn * wghtScaling ;
+                     pfData.oneYrReturn = rr.rtn * wghtScaling; 
                      d3.select('circle.p')                                                          // re-assert to trigger update
                          .attr("cx", function(e) { return x(e.oneYrRisk);   })
                          .attr("cy", function(e) { return y(e.oneYrReturn); });
                 }
              });
 
-         // SVG Graphical Element: circle: one circle for each asset + one for the whole portfolio that is the sum of the size
+         // SVG Graphical Element: circle: one circle for each asset + one for the whole portfolio that is the sum of the size of the portfolio's assets
          svgc.selectAll(".dot")
-             .data(assetDataTbl)                                                               // document.querySelector("circle").__data__
-             .enter().append('circle')                                                         // circle.each(function(d) { d.element = this; }) 
+             .data(assetDataTbl)                                                                    // document.querySelector("circle").__data__
+             .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; }) 
              .attr("pfMemb",  function(d) { return (d.pfMemb);          })
              .attr("class",   function(d) { return (d.assetId);         })
              .attr("myid",    function(d) { return (d.assetId);         })
-             .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })  // use sqrt so that circle area is proportional to weight
+             .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })       // use sqrt so that circle area is proportional to weight
              .attr("cx",      function(d) { return x(d.oneYrRisk);      })
              .attr("cy",      function(d) { return y(d.oneYrReturn);    })
              .style("fill",   function(d) { return color(d.assetClass); })
@@ -144,7 +140,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          // it will only change when the correlations change
          // The line SVG Path we draw
          // The data for our line
-         // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
+         // hyperbola: compute x-values (returns) from y-values (risk) input data (since there can be two y values for a given x)
          var lineData = calcPfRiskFromPfRtns(corrMtx,
                                    assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrRisk   } ),
                                    assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrReturn } ),
