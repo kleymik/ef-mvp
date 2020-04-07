@@ -28,19 +28,19 @@ var assetCount = 0;
 // test2x2();
 // test3x3();
 
-function gdata(x) { return x.__data__; }   // a common accessor
-
+function gdata(x) { return x.__data__ }                        // a common accessor
+function clamp(x) { return Math.min(Math.max(x,  3), 97) }      // max & min threshold to dampen drift from rounding error
 
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
       function(error, jData) {
          assetDataTbl = jData.pfData;                                                   // export data into enclosing scope
-         assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 }; }); // count up the number of assets in the portfolio to clip the correlation matrix
+         assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 } }); // count up the number of assets in the portfolio to clip the correlation matrix
 
          inputCorrMtx = jData.corr.mtx;            
          corrMtx = Array(assetCount);                                                   // slice out assetCount X assetCount matrix from input Matrix
          for(i=0; i<assetCount; i++){
              corrMtx[i] = Array(assetCount);
-             for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j]; }
+             for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j] }
          }
 
          // plot axes
@@ -53,9 +53,9 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .append("g")
              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-         var x     = d3.scale.linear().range([0, width]);
-         x.domain(d3.extent(assetDataTbl, function(d) { return d.oneYrRisk; })).nice();
-         var xAxis = d3.svg.axis().scale(x).orient("bottom");
+         var scalerX = d3.scale.linear().range([0, width]);
+         scalerX.domain(d3.extent(assetDataTbl, function(d) { return d.oneYrRisk })).nice();
+         var xAxis = d3.svg.axis().scale(scalerX).orient("bottom");
          svgc.append("g").attr("class", "x axis")
              .attr("transform", "translate(0," + height + ")")
              .call(xAxis)
@@ -66,9 +66,9 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .style("text-anchor", "end")
              .text("1 Year Risk %");
 
-         var y     = d3.scale.linear().range([height, 0]);
-         y.domain(d3.extent(assetDataTbl, function(d) { return d.oneYrReturn; })).nice();
-         var yAxis = d3.svg.axis().scale(y).orient("left");
+         var scalerY = d3.scale.linear().range([height, 0]);
+         scalerY.domain(d3.extent(assetDataTbl, function(d) { return d.oneYrReturn })).nice();
+         var yAxis = d3.svg.axis().scale(scalerY).orient("left");
          svgc.append("g").attr("class", "y axis")
              .call(yAxis)
              .append("text")
@@ -79,29 +79,17 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .style("text-anchor", "end")
              .text("1 Year Return %");
 
-         // Create and append straightline element into svg group
-         svgc.append("line")
-             .attr("x1", 250)
-             .attr("y1", 50)
-             .attr("x2", 150)
-             .attr("y2", 150)
-             .attr("stroke", "gray")
-             .attr("stroke-width", 8);
-         //     .append("text");
 
          var circleDrag = d3.behavior.drag()                                                        // drag on a circle
              .on("drag", function(d,i) {
                  if (d.assetId!="p") {                                                              // can't stretch the 100% weight portfolio 
                      deltaWght = (d3.event.dx+d3.event.dy) / 4;
                      console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
-                     pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // get just the assets in portfolio, not other objects
-                     numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
-                     pfAssetElems[0].forEach(function(e) {                                          // update their data 
-                         if (d.assetId==e.getAttribute("myid")) {                                   // sameThing = (x.__data__.assetId==x.getAttribute("myid"));  
-                             gdata(e).assetWeight = Math.min(Math.max(gdata(e).assetWeight + deltaWght,  3), 97);                // 3% < weight < 97% to avoid numerical inaccuracy 
-                         } else {                                                                   // downweight the rest equally
-                             gdata(e).assetWeight = Math.min(Math.max(gdata(e).assetWeight - deltaWght/numOtherAssets, 3), 97);  // 3% < weight < 97% to avoid numerical inaccuracy 
-                         }  
+                     pfAssetElems = d3.selectAll("circle").filter(function(e) { return e.pfMemb==1 }) // get just the assets in portfolio, not other objects
+                     numOtherAssets = pfAssetElems[0].length-1;                                       // downweight the non-selected assest equally
+                     pfAssetElems[0].forEach(function(e) {                                            // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy 
+                         if (d.assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght); } // sameThing = (x.__data__.assetId==x.getAttribute("myid"));  
+                         else                                   { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets); }  // downweight the rest equally
                      });
                                                                                                          
                      pfAssetElems.attr("r", function(e){ return Math.sqrt(e.assetWeight * wghtScaling)}) // update radii of all portfolio's assets
@@ -115,8 +103,8 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                      pfData.oneYrRisk   = rr.rsk * wghtScaling;
                      pfData.oneYrReturn = rr.rtn * wghtScaling; 
                      d3.select('circle.p')                                                          // re-assert to trigger update
-                         .attr("cx", function(e) { return x(e.oneYrRisk);   })
-                         .attr("cy", function(e) { return y(e.oneYrReturn); });
+                         .attr("cx", function(e) { return scalerX(e.oneYrRisk)   })
+                         .attr("cy", function(e) { return scalerY(e.oneYrReturn) });
                 }
              });
 
@@ -124,13 +112,13 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          svgc.selectAll(".dot")
              .data(assetDataTbl)                                                                    // document.querySelector("circle").__data__
              .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; }) 
-             .attr("pfMemb",  function(d) { return (d.pfMemb);          })
-             .attr("class",   function(d) { return (d.assetId);         })
-             .attr("myid",    function(d) { return (d.assetId);         })
-             .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling); })       // use sqrt so that circle area is proportional to weight
-             .attr("cx",      function(d) { return x(d.oneYrRisk);      })
-             .attr("cy",      function(d) { return y(d.oneYrReturn);    })
-             .style("fill",   function(d) { return color(d.assetClass); })
+             .attr("pfMemb",  function(d) { return (d.pfMemb)                             })
+             .attr("class",   function(d) { return (d.assetId)                            })
+             .attr("myid",    function(d) { return (d.assetId)                            })
+             .attr("r",       function(d) { return Math.sqrt(d.assetWeight * wghtScaling) })       // use sqrt so that circle area is proportional to weight
+             .attr("cx",      function(d) { return scalerX(d.oneYrRisk)                   })
+             .attr("cy",      function(d) { return scalerY(d.oneYrReturn)                 })
+             .style("fill",   function(d) { return color(d.assetClass)                    })
              .style("stroke", "grey")
              .style("stroke-width", 2)
              .call(circleDrag);
@@ -159,12 +147,22 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("stroke-width", 4)
              .attr("fill", "none");         
 
+         // Create and append straightline element into svg group
+         svgc.append("line")
+             .attr("x1", 250)
+             .attr("y1", 50)
+             .attr("x2", 150)
+             .attr("y2", 150)
+             .attr("stroke", "gray")
+             .attr("stroke-width", 8);
+         //     .append("text");
+         
 
          var legend = svgc.selectAll(".legend")                              // put legend in top right corner
              .data(color.domain())
              .enter().append("g")
              .attr("class", "legend")
-             .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+             .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")" });
          legend.append("rect")
              .attr("x", width - 18)
              .attr("width",  18)
