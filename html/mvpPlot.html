@@ -24,17 +24,20 @@ var corrMtx;
 var assetDataTbl;
 var assetCount = 0;
 
-function gd(x) { return x.__data__; }
+// some testing of the mvp.js functions
+test2x2();
+// test3x3();
+
+function gdata(x) { return x.__data__; }   // a common accessor
 
 
 d3.json("data/assetRskRtns.json",
       function(error, jData) {
          assetDataTbl = jData.pfData;                      // export data into enclosing scope
          assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 }; }); // count up the number of assets in the portfolio to clip the correlation matrix
-         // alert("Number of Assets="+assetCount); 
 
-         corrMtx = Array(assetCount);     // slice out assetCount X assetCount matrix from input Matrix
          inputCorrMtx = jData.corr.mtx;            
+         corrMtx = Array(assetCount);     // slice out assetCount X assetCount matrix from input Matrix
          for(i=0; i<assetCount; i++){
              corrMtx[i] = Array(assetCount);
              for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j]; }
@@ -44,7 +47,7 @@ d3.json("data/assetRskRtns.json",
 
          var color = d3.scale.category10();
 
-         var svgc = d3.select("body").append("svg")  // rename to svgc = svg Container
+         var svgc = d3.select("body").append("svg")                 // svgc = svg Container
              .attr("width",  width  + margin.left + margin.right)
              .attr("height", height + margin.top  + margin.bottom)
              .append("g")
@@ -93,28 +96,28 @@ d3.json("data/assetRskRtns.json",
                      console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
                      pfAssetElems = d3.selectAll("circle").filter(function(e) {return e.pfMemb==1}) // get just the assets in portfolio, not other objects
                      numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
-                     pfAssetElems[0].forEach(function(x) {                                          // update their data 
-                         sameThing = (d.assetId==x.getAttribute("myid"));                           // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
+                     pfAssetElems[0].forEach(function(e) {                                          // update their data 
+                         sameThing = (d.assetId==e.getAttribute("myid"));                           // sameThing = (x.__data__.assetId==x.getAttribute("myid")); 
                          if (sameThing) { 
-                             newWght = x.__data__.assetWeight + deltaWght; 
-                             x.__data__.assetWeight= Math.min(Math.max(newWght,  3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
+                             newWght = gdata(e).assetWeight + deltaWght; 
+                             gdata(e).assetWeight= Math.min(Math.max(newWght,  3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
                          } else { 
-                             newWght = x.__data__.assetWeight - deltaWght/numOtherAssets; 
-                             x.__data__.assetWeight = Math.min(Math.max(newWght, 3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
+                             newWght = gdata(e).assetWeight - deltaWght/numOtherAssets; 
+                             gdata(e).assetWeight = Math.min(Math.max(newWght, 3), 97);           // 3% < weight < 97% to avoid numerical inaccuracy 
                          }  // down weight the rest equally
                      });
 
-                     pfAssetElems.attr("r", function(dd){ return Math.sqrt(dd.assetWeight * wghtScaling)}) // update their radii
+                     pfAssetElems.attr("r", function(e){ return Math.sqrt(e.assetWeight * wghtScaling)}) // update their radii
 
-                     asstWghts = pfAssetElems[0].map(function(x) { return x.__data__.assetWeight/wghtScaling } );
-                     asstRtns  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrReturn             } );
-                     asstRsks  = pfAssetElems[0].map(function(x) { return x.__data__.oneYrRisk               } );
+                     asstWghts = pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling } );
+                     asstRtns  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn             } );
+                     asstRsks  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk               } );
 
                      rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);
 
-                     pfData = d3.select('circle.p')[0][0].__data__;                                 // get all the circles
-                     pfData.oneYrRisk   = rr.rsk*wghtScaling;
-                     pfData.oneYrReturn = rr.rtn*wghtScaling ;
+                     pfData = gdata(d3.select('circle.p')[0][0]);                                 // get all the circles
+                     pfData.oneYrRisk   = rr.rsk * wghtScaling;
+                     pfData.oneYrReturn = rr.rtn * wghtScaling ;
                      d3.select('circle.p')                                                          // re-assert to trigger update
                          .attr("cx", function(e) { return x(e.oneYrRisk);   })
                          .attr("cy", function(e) { return y(e.oneYrReturn); });
@@ -136,7 +139,6 @@ d3.json("data/assetRskRtns.json",
              .style("stroke-width", 2)
              .call(circleDrag);
 
-
          // Create and append hyperbolic line element into svg group
          // this will not change when the asset weights change
          // it will only change when the correlations change
@@ -144,8 +146,8 @@ d3.json("data/assetRskRtns.json",
          // The data for our line
          // hyperbola: compute x-values (returns) from y-values input data (since there can be two y values for a given x)
          var lineData = calcPfRiskFromPfRtns(corrMtx,
-                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrRisk   } ),
-                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(x) { return x.oneYrReturn } ),
+                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrRisk   } ),
+                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrReturn } ),
                                    [ 0.0001, 0.001, 0.01, 0.1, 0.3, 0.5, 1, 2, 3, 4, 5]);
          var lineFunction = d3.svg.line()             // This is the accessor function we talked about above
              .x(function(d) { return d.rtn; })
