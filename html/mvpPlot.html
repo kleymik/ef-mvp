@@ -130,13 +130,15 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          // The data for our line
          // hyperbola: compute x-values (returns) from y-values (risk) input data (since there can be two y values for a given x)
          var lineData = calcPfRiskFromPfRtns(corrMtx,
-                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrRisk   } ),
                                    assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrReturn } ),
-                                   [ 0.0001, 0.001, 0.01, 0.1, 0.3, 0.5, 1, 2, 3, 4, 5]);
+                                   assetDataTbl.filter(function(e) {return e.pfMemb==1}).map(function(e) { return e.oneYrRisk   } ),
+                                             [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8]);
+                                             //[ 0.0001, 0.001, 0.01, 0.1, 0.3, 0.5, 1, 2, 3, 4, 5]
          var lineFunction = d3.svg.line()             // This is the accessor function we talked about above
-             .x(function(d) { return d.rtn; })
-             .y(function(d) { return d.rsk; })
-             .interpolate("cardinal");  //linear basis
+             .x(function(d) { return scalerX(d.rsk) })
+             .y(function(d) { return scalerY(d.rtn) })
+             // .interpolate("cardinal").tension(0.8);  //linear basis
+             .interpolate("monotone");  //linear basis          
          svgc.append("path")
              .attr("d", lineFunction(lineData))
              .attr("pfMemb",   0)
@@ -144,7 +146,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("myid",    123456)
              .attr("lineData", lineData)              // the control points to get an svg "cardinal" to approximnate a hyperbola
              .attr("stroke", "blue")
-             .attr("stroke-width", 4)
+             .attr("stroke-width", 1)
              .attr("fill", "none");         
 
          // Create and append straightline element into svg group
