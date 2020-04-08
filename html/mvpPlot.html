@@ -23,19 +23,27 @@ var asstDataTbl2;
 var corrMtx;
 var assetDataTbl;
 var assetCount = 0;
+var assetCountQ = 0;
 
 // some testing of the mvp.js functions
 // test2x2();
 // test3x3();
 
-function gdata(x) { return x.__data__ }                        // a common accessor
-function clamp(x) { return Math.min(Math.max(x,  3), 97) }      // max & min threshold to dampen drift from rounding error
+function gdata(x)  { return x.__data__ }                         // a common accessor
+function clamp(x)  { return Math.min(Math.max(x,  3), 97) }      // max & min threshold to dampen drift from rounding error
+function forKey(x) { return Object.entries(x) }
 
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
       function(error, jData) {
          assetDataTbl = jData.pfData;                                                   // export data into enclosing scope
-         assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 } }); // count up the number of assets in the portfolio to clip the correlation matrix
-
+         assetDataTbl.forEach(function(d, i) { if (d.pfMemb==1) { assetCount +=1 } });  // count up the number of assets in the portfolio to clip the correlation matrix
+         Object.entries(jData.pfDataX).forEach(([k,r]) => { console.log("The value: ", r.assetClass) });
+         Object.entries(jData.pfDataX).forEach(([k,r]) => { if (r.pfMemb==1) { assetCountQ +=1 } });          // use element id "k" to get record info "r"
+         // Object.entries(myObject).forEach(([k,v]) => {
+         //   console.log("The key: ", k)
+         //   console.log("The value: ", v)
+         // })
+          
          inputCorrMtx = jData.corr.mtx;            
          corrMtx = Array(assetCount);                                                   // slice out assetCount X assetCount matrix from input Matrix
          for(i=0; i<assetCount; i++){
@@ -149,7 +157,23 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("stroke-width", 1)
              .attr("fill", "none");         
 
-         // Create and append straightline element into svg group
+         if (1==0) { // tbd triangle of correlations)
+           // Create and append straightline element into svg group
+          svgc.selectAll(".dot")
+              .data(jData.corrTriang)                                                      // document.querySelector("circle").__data__
+              .enter().append('line')                                                      // circle.each(function(d) { d.element = this; }) 
+              .attr("pfMemb",  0)
+              .attr("class",   "corr-line")
+              .attr("myid",    function(d) { return (d.assetId)                            })
+              .attr("x1",      function(d) { return scalerX(d.oneYrRisk)                   })
+              .attr("y1",      function(d) { return scalerY(d.oneYrReturn)                 })
+              .attr("x2",      function(d) { return scalerX(d.oneYrRisk)                   })
+              .attr("y2",      function(d) { return scalerY(d.oneYrReturn)                 })
+              .style("stroke", "grey")
+              .style("stroke-width", 8)
+              // .call(circleDrag);
+          }          
+
          svgc.append("line")
              .attr("x1", 250)
              .attr("y1", 50)
