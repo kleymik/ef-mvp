@@ -7,7 +7,7 @@
 	     "m":  { "oneYrReturn":9.0, "oneYrRisk":9.0,  "assetWeight":1,   "assetClass":"maxmax",    "assetId":"m",  "pfMemb":0 }},
 
   "corr-ordering":["c1", "e1", "g1", "c2", "e2", "g2"],
-  "corr-comment1":"Asset Ordering should correspond to ordering of the assets in pfData above",
+  "corr-comment1":"Asset ordering should correspond to ordering of the assets in pfData above",
   "corr-comment2":"Make sure constructed corr matrix is in the order defined by 'reducing double for-loop' over items in pfData",
   "corrTriang": {"c1-e1": 0.5,
                  "c1-g1": 0.4,

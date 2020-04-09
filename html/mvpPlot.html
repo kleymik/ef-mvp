@@ -19,7 +19,6 @@ height = 500 - margin.top - margin.bottom;
 
 var wghtScaling = 10.0;
 var corrMtx;
-var assetCount = 0;
 
 // some testing of the mvp.js functions
 // test2x2();
@@ -94,7 +93,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
               if (d[1].assetId!="p") {                                                           // can't stretch the 100% weight portfolio
                   deltaWght = (d3.event.dx+d3.event.dy) / 4;
                   console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
-                  pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get just the assets in portfolio, not other objects
+                  pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get the other circles, just the assets in portfolio
                   numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
                   pfAssetElems[0].forEach(function(e) {                                          // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy
                       if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght); }
@@ -103,14 +102,14 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
                   pfAssetElems.attr("r", ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling)}) // update radii of all portfolio's assets
 
-                  asstWghts = pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling } );
-                  asstRtns  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn             } );
-                  asstRsks  = pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk               } );
-
-                  rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);                  // compute new total portfolio risk & return
+                  rr = calcPfRiskEnRtn(corrMtx,
+                                       pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk }),
+                                       pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn }),
+                                       pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling }));                  // compute new total portfolio risk & return
                   pfData = gdata(d3.select('circle.p')[0][0]);                                   // get the total portfolio circle
                   pfData.oneYrRisk   = rr.rsk * wghtScaling;
                   pfData.oneYrReturn = rr.rtn * wghtScaling;
+
                   d3.select('circle.p')                                                          // re-assert to trigger update
                       .attr("cx", ([k,r]) => { return scalerX(r.oneYrRisk)   })
                       .attr("cy", ([k,r]) => { return scalerY(r.oneYrReturn) });
