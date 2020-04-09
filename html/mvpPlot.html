@@ -18,7 +18,6 @@ width  = 960 - margin.left - margin.right,
 height = 500 - margin.top - margin.bottom;
 
 var wghtScaling = 10.0;
-var inputCorrMtx;
 var corrMtx;
 var assetCount = 0;
 
@@ -33,20 +32,29 @@ function forKey(x) { return Object.entries(x) }                  // c.f. python,
 
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
       function(error, jData) {
-         forKey(jData.pfData).forEach(([k,r]) => { if (r.pfMemb==1) { assetCount +=1 } });          // use element id "k" to get record info "r"
-          
-         inputCorrMtx = jData.corr.mtx;            
-         corrMtx = Array(assetCount);                                                   // slice out assetCount X assetCount matrix from input Matrix
-         for(i=0; i<assetCount; i++){
-             corrMtx[i] = Array(assetCount);
-             for(j=0; j<assetCount; j++){ corrMtx[i][j] = inputCorrMtx[i][j] }
-         }
 
-         // plot axes
+         // 1) populate correlation matrix from list of pair-wise correlations
+         pfAssetEls = forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1 })                // get just the assets in portfolio, not other objects
 
+         corrMtx = Array(pfAssetEls.length);                                                        // could use numeric.js to create an identity mtx?
+         for(i=0; i<pfAssetEls.length; i++) { corrMtx[i] = Array(pfAssetEls.length) }
+
+         pfAssetEls.forEach(function(d,i) {                                                         
+             pfAssetEls.forEach(function(e,j)  {
+                 if (i==j) {
+                     corrMtx[i][j] = 1.0;
+                 } else {
+                     prId = d[0]+"-"+e[0]
+                     if (prId in jData.corrTriangX) { corrMtx[i][j] = corrMtx[j][i] = jData.corrTriangX[prId]; }// symmetric off-diagonals
+                 } 
+             })
+         })
+
+
+         // 2) plot axes
          var color = d3.scale.category10();
 
-         var svgc = d3.select("body").append("svg")                                     // svgc = svg Container
+         var svgc = d3.select("body").append("svg")                                                 // svgc = svg Container
              .attr("width",  width  + margin.left + margin.right)
              .attr("height", height + margin.top  + margin.bottom)
              .append("g")
@@ -54,7 +62,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
          var scalerX = d3.scale.linear().range([0, width]);
          qq = d3.extent(forKey(jData.pfData), ([k,r]) => r.oneYrRisk);
-         scalerX.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrRisk })).nice();  // unpacking dict key-values into array for d3.extent()
+         scalerX.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrRisk })).nice(); // unpacking dict key-values into array for d3.extent()
          var xAxis = d3.svg.axis().scale(scalerX).orient("bottom");
          svgc.append("g").attr("class", "x axis")
              .attr("transform", "translate(0," + height + ")")
@@ -80,14 +88,15 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .text("1 Year Return %");
 
 
+         // 3) create circles for each asset at given risk,return coordinate, circle size = asset weight in portfolio
          var circleDrag = d3.behavior.drag()                                                        // drag on a circle
              .on("drag", function(d, i) {
-                 if (d[1].assetId!="p") {                                                            // can't stretch the 100% weight portfolio 
+                 if (d[1].assetId!="p") {                                                           // can't stretch the 100% weight portfolio 
                      deltaWght = (d3.event.dx+d3.event.dy) / 4;
                      console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
-                     pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 }) // get just the assets in portfolio, not other objects
-                     numOtherAssets = pfAssetElems[0].length-1;                                      // downweight the non-selected assest equally
-                     pfAssetElems[0].forEach(function(e) {                                           // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy 
+                     pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get just the assets in portfolio, not other objects
+                     numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
+                     pfAssetElems[0].forEach(function(e) {                                          // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy 
                          if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght); }
                          else                                      { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets); }  // downweight the rest in equal proportions
                      });
@@ -112,11 +121,11 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           // scgc[0].g.children[2].circle.attributes.pfMemb
           svgc.selectAll(".dot")
              .data(forKey(jData.pfData))                                                            // document.querySelector("circle").__data__
-             .enter().append('circle')                                                               // circle.each(function(d) { d.element = this; }) 
+             .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; }) 
              .attr("pfMemb",  ([k,r]) => { return r.pfMemb                               })
              .attr("class",   ([k,r]) => { return r.assetId                              })
              .attr("myid",    ([k,r]) => { return r.assetId                              })
-             .attr("r",       ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) })          // use sqrt so that circle area is proportional to weight
+             .attr("r",       ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) })         // use sqrt so that circle area is proportional to weight
              .attr("cx",      ([k,r]) => { return scalerX(r.oneYrRisk)                   })
              .attr("cy",      ([k,r]) => { return scalerY(r.oneYrReturn)                 })
              .style("fill",   ([k,r]) => { return color(r.assetClass)                    })
@@ -124,17 +133,15 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .style("stroke-width", 2)
              .call(circleDrag);
 
-         // Create and append hyperbolic line element into svg group
-         // this will not change when the asset weights change
-         // it will only change when the correlations change
-         // The line SVG Path we draw
-         // The data for our line
+
+         // 4) Create and append hyperbolic line element into svg group
+         // this will not change when the asset weights change, only when the correlations change
          // hyperbola: compute x-values (returns) from y-values (risk) input data (since there can be two y values for a given x)
          var lineData = calcPfRiskFromPfRtns(corrMtx,
                                    forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrReturn } ),
                                    forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrRisk   } ),
                                    [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8]);
-         var lineFunction = d3.svg.line()             // This is the accessor function we talked about above
+         var lineFunction = d3.svg.line()
              .x(function(d) { return scalerX(d.rsk) })
              .y(function(d) { return scalerY(d.rtn) })
              .interpolate("monotone");               // .interpolate("cardinal").tension(0.8);  // linear basis
@@ -142,30 +149,38 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("d", lineFunction(lineData))
              .attr("pfMemb",   0)
              .attr("class",   "frontier")             // search for this when using selectAll() d3.selectAll('path.frontier')  
-             .attr("myid",    123456)
+             .attr("myid",     123456)
              .attr("lineData", lineData)              // the control points to get an svg "cardinal" to approximnate a hyperbola
-             .attr("stroke", "blue")
+             .attr("stroke",  "blue")
              .attr("stroke-width", 1)
-             .attr("fill", "none");         
-
-             // Create and append straightline element into svg group
-             // for each corrleation get the records of the each of the pair of assests
-          svgc.selectAll(".dot")
-              .data(jData.corrTriang.map(([e1,e2,e3]) => { return [jData.pfData[e1], jData.pfData[e2], e3] }) )                                                      // document.querySelector("circle").__data__
-              .enter().append('line')                                                      // circle.each(function(d) { d.element = this; }) 
-              .attr("pfMemb",  0)
-              .attr("class",   "corr-line")
-              .attr("myid",    function(d) { return (d[0].assetId + "-" + d[1].assetId) })
-              .attr("x1",      function(d) { return scalerX(d[0].oneYrRisk)            })
-              .attr("y1",      function(d) { return scalerY(d[0].oneYrReturn)          })
-              .attr("x2",      function(d) { return scalerX(d[1].oneYrRisk)            })
-              .attr("y2",      function(d) { return scalerY(d[1].oneYrReturn)          })
-              .style("stroke", "grey")
-              .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
-              // .call(circleDrag);
+             .attr("fill",    "none");         
 
 
-         var legend = svgc.selectAll(".legend")                              // put legend in top right corner
+          // 5) add straightline elements into svg group for each corrleation get the records of the each of the pair of assests
+          var lineDrag = d3.behavior.drag()                                                        // drag on a circle
+              .on("drag", function(d, i) {
+                  deltaCorr = (d3.event.dy) / 4;
+                  console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaCorr);
+               // .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
+             });
+          svgc.selectAll(".dot") // .concat(corr)??
+             // .data(forKey(jData.corrTriangX).map(([idPair,corr]) => {    [id0,id1] = idPair.split("-"); return [jData.pfData[id0], jData.pfData[id1], corr] }) )                      
+             .data(forKey(jData.corrTriangX).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
+             .enter().append('line')                                                      // circle.each(function(d) { d.element = this; }) 
+             .attr("pfMemb",  0)
+             .attr("class",   "corr-line")
+             .attr("myid",    function(d) { return d[0] + "-" + d[1]                       }) // recreate the pair-id
+             .attr("x1",      function(d) { return scalerX(jData.pfData[d[0]].oneYrRisk)   })
+             .attr("y1",      function(d) { return scalerY(jData.pfData[d[0]].oneYrReturn) })
+             .attr("x2",      function(d) { return scalerX(jData.pfData[d[1]].oneYrRisk)   })
+             .attr("y2",      function(d) { return scalerY(jData.pfData[d[1]].oneYrReturn) })
+             .style("stroke", "red")
+             .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
+             // .call(lineDrag);
+
+
+         // 6) put legend in top right corner          
+         var legend = svgc.selectAll(".legend")                              
              .data(color.domain())
              .enter().append("g")
              .attr("class", "legend")
