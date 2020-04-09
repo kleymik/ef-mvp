@@ -39,14 +39,14 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          corrMtx = Array(pfAssetEls.length);                                                        // could use numeric.js to create an identity mtx?
          for(i=0; i<pfAssetEls.length; i++) { corrMtx[i] = Array(pfAssetEls.length) }
 
-         pfAssetEls.forEach(function(d,i) {                                                         
+         pfAssetEls.forEach(function(d,i) {
              pfAssetEls.forEach(function(e,j)  {
                  if (i==j) {
                      corrMtx[i][j] = 1.0;
                  } else {
                      prId = d[0]+"-"+e[0]
                      if (prId in jData.corrTriangX) { corrMtx[i][j] = corrMtx[j][i] = jData.corrTriangX[prId]; }// symmetric off-diagonals
-                 } 
+                 }
              })
          })
 
@@ -75,7 +75,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .text("1 Year Risk %");
 
          var scalerY = d3.scale.linear().range([height, 0]);
-         scalerY.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrReturn })).nice(); //unpacking dict key-values into array for d3.extent          
+         scalerY.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrReturn })).nice(); //unpacking dict key-values into array for d3.extent
          var yAxis = d3.svg.axis().scale(scalerY).orient("left");
          svgc.append("g").attr("class", "y axis")
              .call(yAxis)
@@ -91,16 +91,16 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          // 3) create circles for each asset at given risk,return coordinate, circle size = asset weight in portfolio
          var circleDrag = d3.behavior.drag()                                                        // drag on a circle
              .on("drag", function(d, i) {
-                 if (d[1].assetId!="p") {                                                           // can't stretch the 100% weight portfolio 
+                 if (d[1].assetId!="p") {                                                           // can't stretch the 100% weight portfolio
                      deltaWght = (d3.event.dx+d3.event.dy) / 4;
                      console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
                      pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get just the assets in portfolio, not other objects
                      numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
-                     pfAssetElems[0].forEach(function(e) {                                          // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy 
+                     pfAssetElems[0].forEach(function(e) {                                          // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy
                          if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght); }
                          else                                      { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets); }  // downweight the rest in equal proportions
                      });
-                                                                                                         
+
                      pfAssetElems.attr("r", ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling)}) // update radii of all portfolio's assets
 
                      asstWghts = pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling } );
@@ -110,7 +110,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                      rr = calcPfRiskEnRtn(corrMtx, asstRsks, asstRtns, asstWghts);                  // compute new total portfolio risk & return
                      pfData = gdata(d3.select('circle.p')[0][0]);                                   // get the total portfolio circle
                      pfData.oneYrRisk   = rr.rsk * wghtScaling;
-                     pfData.oneYrReturn = rr.rtn * wghtScaling; 
+                     pfData.oneYrReturn = rr.rtn * wghtScaling;
                      d3.select('circle.p')                                                          // re-assert to trigger update
                          .attr("cx", ([k,r]) => { return scalerX(r.oneYrRisk)   })
                          .attr("cy", ([k,r]) => { return scalerY(r.oneYrReturn) });
@@ -121,7 +121,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           // scgc[0].g.children[2].circle.attributes.pfMemb
           svgc.selectAll(".dot")
              .data(forKey(jData.pfData))                                                            // document.querySelector("circle").__data__
-             .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; }) 
+             .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; })
              .attr("pfMemb",  ([k,r]) => { return r.pfMemb                               })
              .attr("class",   ([k,r]) => { return r.assetId                              })
              .attr("myid",    ([k,r]) => { return r.assetId                              })
@@ -148,12 +148,12 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
          svgc.append("path")
              .attr("d", lineFunction(lineData))
              .attr("pfMemb",   0)
-             .attr("class",   "frontier")             // search for this when using selectAll() d3.selectAll('path.frontier')  
+             .attr("class",   "frontier")             // search for this when using selectAll() d3.selectAll('path.frontier')
              .attr("myid",     123456)
              .attr("lineData", lineData)              // the control points to get an svg "cardinal" to approximnate a hyperbola
              .attr("stroke",  "blue")
              .attr("stroke-width", 1)
-             .attr("fill",    "none");         
+             .attr("fill",    "none");
 
 
           // 5) add straightline elements into svg group for each corrleation get the records of the each of the pair of assests
@@ -164,9 +164,9 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                // .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
              });
           svgc.selectAll(".dot") // .concat(corr)??
-             // .data(forKey(jData.corrTriangX).map(([idPair,corr]) => {    [id0,id1] = idPair.split("-"); return [jData.pfData[id0], jData.pfData[id1], corr] }) )                      
+             // .data(forKey(jData.corrTriangX).map(([idPair,corr]) => {    [id0,id1] = idPair.split("-"); return [jData.pfData[id0], jData.pfData[id1], corr] }) )
              .data(forKey(jData.corrTriangX).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
-             .enter().append('line')                                                      // circle.each(function(d) { d.element = this; }) 
+             .enter().append('line')                                                      // circle.each(function(d) { d.element = this; })
              .attr("pfMemb",  0)
              .attr("class",   "corr-line")
              .attr("myid",    function(d) { return d[0] + "-" + d[1]                       }) // recreate the pair-id
@@ -179,8 +179,8 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              // .call(lineDrag);
 
 
-         // 6) put legend in top right corner          
-         var legend = svgc.selectAll(".legend")                              
+         // 6) put legend in top right corner
+         var legend = svgc.selectAll(".legend")
              .data(color.domain())
              .enter().append("g")
              .attr("class", "legend")
@@ -196,7 +196,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              .attr("dy", ".35em")
              .style("text-anchor", "end")
              .text(function(d) { return d; });
-      }); 
+      });
 
 
 </script>
