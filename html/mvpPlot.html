@@ -45,7 +45,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                   corrMtx[i][j] = 1.0;
               } else {
                   prId = d[0]+"-"+e[0]
-                  if (prId in jData.corrTriangX) { corrMtx[i][j] = corrMtx[j][i] = jData.corrTriangX[prId]; }// symmetric off-diagonals
+                  if (prId in jData.corrTriang) { corrMtx[i][j] = corrMtx[j][i] = jData.corrTriang[prId]; }// symmetric off-diagonals
              }
           })
       })
@@ -164,7 +164,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
               // .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
           });
       svgc.selectAll(".dot") // .concat(corr)??
-          .data(forKey(jData.corrTriangX).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
+          .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
           .enter().append('line')                                                      // circle.each(function(d) { d.element = this; })
           .attr("pfMemb",  0)
           .attr("class",   "corr-line")
