@@ -162,7 +162,7 @@ ws
 #
 
 # %% [markdown]
-# ## 2 manipulate equation using sympy - solve for $\sigma$ <a class="anchor" id="2"></a>
+# ## 2: manipulate equation using sympy - solve for $\sigma$ <a class="anchor" id="2"></a>
 #
 # take positive solution only
 
@@ -198,23 +198,29 @@ sym.factor(ws['sigamEqn'] - sym.factor(ws['sigamEqn']))
 # %% pycharm={"is_executing": false}
 ws['prec'] = 4 # number of digits of precision to display numerical values
 
-ws['mu3'] = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
+#ws['mu3'] = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
+ws['mu3'] = sym.Matrix(np.array([5.1, 7.0, 0.9]).T) # mu3 = sym.Matrix(mu3)
+
 ws['mu3']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # *cor3*: sample correlations:
 
 # %% pycharm={"is_executing": false}
-ws['cor3'] = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
-                         [ 0.61229076,  1.,         -0.29579264],
-                         [-0.13636468, -0.29579264,  1.        ]])
+#ws['cor3'] = sym.Matrix([[ 1.,          0.61229076, -0.13636468],
+#                         [ 0.61229076,  1.,         -0.29579264],
+#                         [-0.13636468, -0.29579264,  1.        ]])
+ws['cor3'] = sym.Matrix([[  1.0,  0.5,  0.4],
+                         [  0.5,  1.0, -0.1],
+                         [  0.4, -0.1, 1.0]])
 sym.N(ws['cor3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # *vol3*: sample vols (stdev):
 
 # %% pycharm={"is_executing": false}
-ws['vol3'] = sym.Matrix([ 0.05,  0.08,  0.02]) 
+#ws['vol3'] = sym.Matrix([ 0.05,  0.08,  0.02])
+ws['vol3'] = sym.Matrix([ 3.5,  4.2,  1.1]) 
 sym.N(ws['vol3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
@@ -252,15 +258,13 @@ ws['oneOverVol'] * ws['cov3'] * ws['oneOverVol']            # oneOverVol is diag
 #
 # $A,B,C,D$ calculated numerically as variables a,b,c,d:
 
-# %% [markdown] pycharm={"name": "#%% md\n"}
-# try some new covariance, *cov3N*:
-
-# %% pycharm={"is_executing": false}
+# %% pycharm={"is_executing": false, "name": "#%% \n"}
+# try some new covariance:
 # sample covariance matrix
-ws['cov3N'] = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
-                          [1.52285714, 1.88142857, 1.39309524],
-                          [0.90285714, 1.39309524, 1.95809524]])
-sym.N(ws['cov3N'], ws['prec'])
+#' ws['cov3'] = sym.Matrix([[1.61904762, 1.52285714, 0.90285714],
+#                          [1.52285714, 1.88142857, 1.39309524],
+#                          [0.90285714, 1.39309524, 1.95809524]])
+#sym.N(ws['cov3'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # vector of 3 ones:
@@ -270,16 +274,16 @@ ws['ones3'] = sym.Matrix([1,1,1])
 ws['ones3']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# inverse of *cov3N*
+# inverse of *cov3*
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-sym.N(ws['cov3N']**(-1), ws['prec'])
+sym.N(ws['cov3']**(-1), ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# check condition number of *cov3N* inverse:
+# check condition number of *cov3* inverse:
 
 # %% pycharm={"is_executing": false}
-sym.N(LA.cond(np.array(ws['cov3B']**(-1), dtype=float)), ws['prec']) 
+sym.N(LA.cond(np.array(ws['cov3']**(-1), dtype=float)), ws['prec']) 
 
 # %% [markdown]
 # calculate $A$ from covariance $V = cov3$, and $e = mu3$
@@ -287,21 +291,21 @@ sym.N(LA.cond(np.array(ws['cov3B']**(-1), dtype=float)), ws['prec'])
 # $$ matrix\ A = \mathbf{1}^T V^{-1} e == e^T V^{-1}\mathbf{1} $$
 
 # %% pycharm={"is_executing": false}
-ws['a'] = ws['ones3'].T @ ws['cov3N']**(-1) @ ws['mu3'] # = (mu3.T @ cov3B**(-1) @ ones3.T)
+ws['a'] = ws['ones3'].T @ ws['cov3']**(-1) @ ws['mu3'] # = (mu3.T @ cov3**(-1) @ ones3.T)
 sym.N(ws['a'], ws['prec'])
 
 # %% [markdown]
 # calculate $$B$$ from covariance $$V$$=cov3, and $$e$$=mu3: $ matrix\ B = e^T V^{-1} e $
 
 # %% pycharm={"is_executing": false}
-ws['b'] = ws['mu3'].T @ ws['cov3B']**(-1) @ ws['mu3'] 
+ws['b'] = ws['mu3'].T @ ws['cov3']**(-1) @ ws['mu3'] 
 sym.N(ws['b'], ws['prec'])
 
 # %% [markdown]
 # calculate $$C$$ from covariance $$V$$=cov3: $$ matrix\ C = \mathbf{1}^T V^{-1} \mathbf{1} $$
 
 # %% pycharm={"is_executing": false}
-ws['c']  = ws['ones3'].T @ ws['cov3B']**(-1) @ ws['ones3']
+ws['c']  = ws['ones3'].T @ ws['cov3']**(-1) @ ws['ones3']
 sym.N(ws['c'], ws['prec'])
 
 # %% [markdown]
@@ -322,22 +326,27 @@ sym.N(ws['d'], ws['prec'])
 # e.g. for $\mu = 0.3$, $\sigma =$ 
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-ws['sgma'] = ( (ws['d'] + (0.3*ws['c'] - ws['a'])**2) / (ws['c']*ws['d']) )**(0.5)
-sym.N(sgma, sPrec)
+print(' sigma from mu')
+ws['sgma'] = ( (ws['d'] + (0.03 * ws['c'] - ws['a'])**2) / (ws['c']*ws['d']) )**(0.5)
+sym.N(ws['sgma'], ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # e.g. for $\sigma = 3.086$, $\mu =???$
 
 # %% pycharm={"is_executing": false}
+print('mu from sigma)')
+# check calculate back mu from sigma
 #m = ( (d * (1.351**2 * c - 1))**(1/2) + a ) / c
-((ws['d'] * ((ws['sgma']**2 * ws['c']) - sym.Matrix([[1]])) )**(0.5) + ws['a'] ) / ws['c']
+#((ws['d'] * ((ws['sgma']**2 * ws['c']) - sym.Matrix([[1]])) )**(0.5) + ws['a'] ) / ws['c']
+((ws['d'] * ((2**2 * ws['c']) + sym.Matrix([[1]])) )**(0.5) + ws['a'] ) / ws['c']
 
 
 #sym.N(m, sPrec)
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
-# mimimum: sigma, mu
-(np.sqrt(1/ws['c']), ws['a']/ws['c'])
+# mimimum: 
+print("sigma, mu")
+( (sym.Matrix([1]) / ws['c'])**(0.5), ws['a'] / ws['c'] )
 
 # %% [markdown]
 # ## 4: Symbolic Plot <a class="anchor" id="4"></a>
@@ -361,9 +370,13 @@ ws['fsgma']
 # $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
 
 # %% pycharm={"is_executing": false}
-ws['fmu'] = (( (ws['d'] * (sigma**2 * ws['c'] - sym.Matrix([[1]]) ) )**0.5 + ws['a'] ) / ws['c'])[0]
-symplot(ws['fmu'], (sigma, 0.1, 5), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma')
+ws['fmuA'] = (( ws['a'] + (ws['d'] * (sigma**2 * ws['c'] - sym.Matrix([[1]]) ) )**0.5  ) / ws['c'])[0]
+ws['fmuB'] = (( ws['a'] - (ws['d'] * (sigma**2 * ws['c'] - sym.Matrix([[1]]) ) )**0.5 + ws['a'] ) / ws['c'])[0]
+p0 = symplot(ws['fmuA'], (sigma, 1, 4), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma', show=False)
+p1 = symplot(ws['fmuB'], (sigma, 1, 4), axis_center=(0.0,0.0), ylabel='$\mu$ mu', xlabel='$\sigma$ sigma', show=False)
+p0.append(p1[0])
 ws['fmu']
+p0.show()
 
 
 # %% pycharm={"is_executing": false}
@@ -383,7 +396,7 @@ v = [(x, fmew(x,'neg')) for x in srange(1.125,1.119515028,-1e-6)]+[(x, fmew(x,'p
 line(v, figsize=[4,4])
 
 # %% [markdown]
-# ## 5: Explcit formula <a class="anchor" id="5"></a>
+# ## 5: Closed form formulae <a class="anchor" id="5"></a>
 #
 # for small portfolio (3 assets) - covariance $V$
 #
