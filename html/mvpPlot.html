@@ -17,16 +17,19 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
 width  = 960 - margin.left - margin.right,
 height = 500 - margin.top - margin.bottom;
 
-var wghtScaling = 10.0;
+var wghtScaling = 15.0;
+var corrScaling = 100.0;
 var corrMtx;
+var hypSampling = [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8];
 
 // some testing of the mvp.js functions
 // test2x2();
 // test3x3();
 
-function gdata(x)  { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
-function clamp(x)  { return Math.min(Math.max(x,  3), 97) }      // max & min threshold to dampen drift from rounding error
-function forKey(x) { return Object.entries(x) }                  // c.f. python, get all (key & value)s out of a dict
+// utility functions
+function gdata(x)              { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
+function clamp(x, vMin, vMax)  { return Math.min(Math.max(x,  vMin), vMax) } // max & min threshold to dampen drift from rounding error
+function forKey(x)             { return Object.entries(x) }                  // c.f. python, get all (key & value)s out of a dict
 
 
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
@@ -48,7 +51,9 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
              }
           })
       })
-      
+
+      hdr = {}; pfAssetEls.forEach(function(q,i) { hdr[q[0]] = i });
+      corr = { "hdrs": hdr, "mtx": corrMtx}                                                      // add asset-id index into corr matrix
       
       // 2) plot axes
       var color = d3.scale.category10();
@@ -87,30 +92,34 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           .text("1 Year Return %");
 
 
+      // if (!d3.event.sourceEvent.altKey) shiftKey?
+          
       // 3) create circles for each asset at given risk,return coordinate, circle size = asset weight in portfolio
       var circleDrag = d3.behavior.drag()                                                        // drag on a circle
           .on("drag", function(d, i) {
-              if (d[1].assetId!="p") {                                                           // can't stretch the 100% weight portfolio
+              if (d[1].assetId!="p") {                                                            // can't stretch the 100% weight portfolio
                   deltaWght = (d3.event.dx+d3.event.dy) / 4;
                   console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght);
-                  pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get the other circles, just the assets in portfolio
-                  numOtherAssets = pfAssetElems[0].length-1;                                     // downweight the non-selected assest equally
-                  pfAssetElems[0].forEach(function(e) {                                          // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy
-                      if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght); }
-                      else                                      { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets); }  // downweight the rest in equal proportions
+                  pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 }) // get the other circles, just the assets in portfolio
+                  numOtherAssets = pfAssetElems[0].length-1;                                      // downweight the non-selected assest equally
+                  pfAssetElems[0].forEach(function(e) {                                           // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy
+                      if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght,                3, 97); }
+                      else                                      { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets, 3, 97); }  // downweight the rest in equal proportions
                   });
 
                   pfAssetElems.attr("r", ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling)}) // update radii of all portfolio's assets
 
-                  rr = calcPfRiskEnRtn(corrMtx,
+                  rr = calcPfRiskEnRtn(corr.mtx,
                                        pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk }),
                                        pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn }),
                                        pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling }));                  // compute new total portfolio risk & return
-                  pfData = gdata(d3.select('circle.p')[0][0]);                                   // get the total portfolio circle
+
+                  totalPfCirc = d3.select('circle.p');                  
+                  pfData = gdata(totalPfCirc[0][0]);                                   // get the total portfolio circle
                   pfData.oneYrRisk   = rr.rsk * wghtScaling;
                   pfData.oneYrReturn = rr.rtn * wghtScaling;
 
-                  d3.select('circle.p')                                                          // re-assert to trigger update
+                  totalPfCirc  // d3.select('circle.p')                                                          // re-assert to trigger update
                       .attr("cx", ([k,r]) => { return scalerX(r.oneYrRisk)   })
                       .attr("cy", ([k,r]) => { return scalerY(r.oneYrReturn) });
              }
@@ -130,13 +139,14 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           .style("fill",   ([k,r]) => { return color(r.assetClass)                    })
           .style("stroke", "grey")
           .style("stroke-width", 2)
+          .style("fill-opacity", 0.3) 
           .call(circleDrag);
 
 
       // 4) Create and append hyperbolic line element into svg group
       // this will not change when the asset weights change, only when the correlations change
       // hyperbola: compute x-values (returns) from y-values (risk) input data (since there can be two y values for a given x)
-      var lineData = calcPfRiskFromPfRtns(corrMtx,
+      var lineData = calcPfRiskFromPfRtns(corr.mtx,
                                 forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrReturn } ),
                                 forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrRisk   } ),
                                 [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8]);
@@ -156,25 +166,73 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
 
       // 5) add straightline elements into svg group for each corrleation get the records of the each of the pair of assests
-      var lineDrag = d3.behavior.drag()                                                        // drag on a circle
+      var lineDrag = d3.behavior.drag()                                                     // drag on a circle
           .on("drag", function(d, i) {
-              deltaCorr = (d3.event.dy) / 4;
-              console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaCorr);
-              // .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
+              if (d3.event.dy!=0) {
+                  deltaCorr = (d3.event.dy) / corrScaling;
+                  //jData.corrTriang[d[0]+"-"+d[1]] += deltaCorr;
+                  // update symmetrical entries in correlation matrix
+                  thisCorrLine = d3.select(this);
+                  r = corr.hdrs[d[0]];
+                  c = corr.hdrs[d[1]];
+                  // update correlation in three(!) places
+                  d[2] = corr.mtx[r][c] = corr.mtx[c][r] = clamp(corr.mtx[r][c] + deltaCorr, -0.85, 0.85) // limit, since exactly anti-correlated is numerically unstable
+                  console.log("mvp:d3.drag corr: deltaCorr="+deltaCorr+", corr="+d[2]);
+
+                  if (1) {
+                      thisCorrLine
+                          .style("stroke",       function(d) { return ["red", "grey","green"][Math.sign(d[2])+1] })
+                          .style("stroke-width", function(d) { return 1 + Math.abs(d[2]) * 20                    });
+                  }
+                  
+                  // .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
+                  // d.style("stroke-width");
+                  // re-assert ? to trigger update
+                      
+                  // given the new correlation, recompute hyperbola
+
+                  if (1) {
+                      pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })// get the other circles, just the assets in portfolio
+                      rr = calcPfRiskEnRtn(corr.mtx, // <- this has changed
+                                           pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk }),
+                                           pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn }),
+                                           pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling }));                  // compute new total portfolio risk & return
+                      totalPfCirc = d3.select('circle.p');
+                      pfData = gdata(totalPfCirc[0][0]);                                        // 0 = get the total portfolio circle
+                      pfData.oneYrRisk   = rr.rsk * wghtScaling;
+                      pfData.oneYrReturn = rr.rtn * wghtScaling;
+                      totalPfCirc                                                               // re-assert to trigger update
+                          .attr("cx", ([k,r]) => { return scalerX(r.oneYrRisk)   })
+                          .attr("cy", ([k,r]) => { return scalerY(r.oneYrReturn) });
+                  }
+                  
+                  if (1) {
+                      hyperb = d3.select('path.frontier');
+                      var lineData = calcPfRiskFromPfRtns(corr.mtx,
+                                                      forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrReturn } ),
+                                                      forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrRisk   } ),
+                                                      [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8]);
+                      hyperb
+                          .attr("d", lineFunction(lineData))
+                          .attr("lineData", lineData);              // the control points to get an svg "cardinal" to approximnate a hyperbola
+                  }
+              }
           });
-      svgc.selectAll(".dot") // .concat(corr)??
+      svgc.selectAll(".dot")                                                                // .concat(corr)??
           .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
-          .enter().append('line')                                                      // circle.each(function(d) { d.element = this; })
+          .enter().append('line')                                                           // circle.each(function(d) { d.element = this; })
           .attr("pfMemb",  0)
           .attr("class",   "corr-line")
-          .attr("myid",    function(d) { return d[0] + "-" + d[1]                       }) // recreate the pair-id
-          .attr("x1",      function(d) { return scalerX(jData.pfData[d[0]].oneYrRisk)   })
-          .attr("y1",      function(d) { return scalerY(jData.pfData[d[0]].oneYrReturn) })
-          .attr("x2",      function(d) { return scalerX(jData.pfData[d[1]].oneYrRisk)   })
-          .attr("y2",      function(d) { return scalerY(jData.pfData[d[1]].oneYrReturn) })
-          .style("stroke", "red")
-          .style("stroke-width", 1 + Math.abs(d[3]) * 12 )
-          // .call(lineDrag);
+          .attr("myid",    function(d) { return d[0] + "-" + d[1]                           })  // recreate the pair-id
+          .attr("x1",      function(d) { return scalerX(jData.pfData[d[0]].oneYrRisk)       })
+          .attr("y1",      function(d) { return scalerY(jData.pfData[d[0]].oneYrReturn)     })
+          .attr("x2",      function(d) { return scalerX(jData.pfData[d[1]].oneYrRisk)       })
+          .attr("y2",      function(d) { return scalerY(jData.pfData[d[1]].oneYrReturn)     })
+          .style("stroke", function(d) { return ["red", "grey", "green"][Math.sign(d[2])+1] })
+          .style("stroke-width", function(d) { return 1 + Math.abs(d[2]) * 20               })
+          .style("stroke-linecap", "round")
+          .style("stroke-opacity", 0.3)       
+          .call(lineDrag);
 
 
       // 6) put legend in top right corner
