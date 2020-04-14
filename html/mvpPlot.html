@@ -13,10 +13,10 @@
 <script src="http://localhost:2345/lib/mvp.js"></script>
 <script>
 
-// where this currently runnign script came from:
-// current address             var url = window.location.href
-// Then just parse that string var arr = url.split("/");
-// your url is:                var result = arr[0] + "//" + arr[2]
+// stackoverflow: where this currently running script came from:
+//  current address             var url = window.location.href
+//  Then just parse that string var arr = url.split("/");
+//  your url is:                var result = arr[0] + "//" + arr[2]
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width  = 960 - margin.left - margin.right,
@@ -107,18 +107,33 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                   if (d3.event.sourceEvent.shiftKey) {                                             // kNum = d3.event.keyCode; // console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght+"keyCode"+kNum);
                       d[1].oneYrRisk   += d3.event.dx /  100;
                       d[1].oneYrReturn += d3.event.dy / -100;
-                      curCirc = d3.select("circle."+d[1].assetId)                                  // the struct above "this" - no better way? // console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);                                            
+                      curCirc = d3.select("circle."+d[1].assetId)                                  // the struct above "this" - no better way? // console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);
                       curCirc                                                                      // re-assign same functions to trigger display updates - no better way?
                           .attr("cx", ([k,r]) => { return scalerX(d[1].oneYrRisk)   })
                           .attr("cy", ([k,r]) => { return scalerY(d[1].oneYrReturn) });
+                      
+                      svgc.selectAll('line.corr-line')                                             // too complex/crazy to selected affected lines, brute force, just do all of them
+                          .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
+                          .attr("x1",      function(e) { return scalerX(jData.pfData[e[0]].oneYrRisk)  })
+                          .attr("y1",      function(e) { return scalerY(jData.pfData[e[0]].oneYrReturn) })
+                          .attr("x2",      function(e) { return scalerX(jData.pfData[e[1]].oneYrRisk)   })
+                          .attr("y2",      function(e) { return scalerY(jData.pfData[e[1]].oneYrReturn) })
+                      
                       // // tbd: re-assert n-1 line ends to move them
-                      // corrLines = d3.select('path.frontier').filter(curCirc in id)
-                      //     .attr("x1",      function(d) { return scalerX(jData.pfData[d[0]].oneYrRisk)       })
-                      //     .attr("y1",      function(d) { return scalerY(jData.pfData[d[0]].oneYrReturn)     })
-                      //     .attr("x2",      function(d) { return scalerX(jData.pfData[d[1]].oneYrRisk)       })
-                      //     .attr("y2",      function(d) { return scalerY(jData.pfData[d[1]].oneYrReturn)     })
+                      // corrLines = d3.selectAll('line.corr-line'); // .filter(curCirc in id)
+                      // corrLines[0].forEach(function(e) { //                           a,b = e.myid.split("-")   // get the identities of line end-points
+                      //     if        (e.myId.index(d[0])==0){  // the circle as at x1,y1 of line
+                      //         a = 1;
+                      //     } else if (e.myId.index(d[0])==3)   // the circle as at x2,y2 of line
+                      //         b = 1;
+                      // });
+                      //     // .attr("x1", function(f) {
+                      //     //     return scalerX(jData.pfData[f[0]].oneYrRisk) }
+                      //     //      )
+                      //     // .attr("y1", function(f) { return scalerY(jData.pfData[f[0]].oneYrReturn) })
+                      //     // .attr("x2", function(f) { return scalerX(jData.pfData[f[1]].oneYrRisk)   })
+                      //     // .attr("y2", function(f) { return scalerY(jData.pfData[f[1]].oneYrReturn) });
 
-                      // tbd: recalc and re-assert hyperbola
                       d3.select('path.frontier').attr("d", lineFunction(calcPfRiskFromPfRtns(corr.mtx,      // redraw the changed hyperbola
                                                                          forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrReturn } ),
                                                                          forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrRisk   } ),
@@ -228,9 +243,9 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                                                                      hypSampling))); // the control points to get an svg "cardinal" to approximnate a hyperbola
               }
           });
-      svgc.selectAll(".dot")                                                                // .concat(corr)??
+      svgc.selectAll(".dot")                                                                    // .concat(corr)??
           .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
-          .enter().append('line')                                                           // circle.each(function(d) { d.element = this; })
+          .enter().append('line')                                                               // circle.each(function(d) { d.element = this; })
           .attr("pfMemb",  0)
           .attr("class",   "corr-line")
           .attr("myid",    function(d) { return d[0] + "-" + d[1]                           })  // recreate the pair-id
