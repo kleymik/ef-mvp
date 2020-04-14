@@ -1,7 +1,0 @@
-oneYrReturn	oneYrRisk	assetWeight	assetClass	assetId	pfMemb
-5.1	3.5	33	credit	c1	1
-7.0	4.2	33	equities	e1	1
-0.9	1.1	34	govys	g1	1
-0.0	0.0	100	portfolio	p	0
-0.0	0.0	1.0	zerozero	z	0
-9.0	9.0	0.1	maxmax	m	0
