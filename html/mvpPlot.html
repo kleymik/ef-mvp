@@ -13,15 +13,19 @@
 <script src="http://localhost:2345/lib/mvp.js"></script>
 <script>
 
+// where this currently runnign script came from:
+// current address             var url = window.location.href
+// Then just parse that string var arr = url.split("/");
+// your url is:                var result = arr[0] + "//" + arr[2]
+
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width  = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var wghtScaling =   20.0;
-var corrScaling = -200.0;  // down to move correlation towards -1, down to move correlation towards +1
+var corrScaling = -200.0;  // down to move correlation towards -1, up to move correlation towards +1
 var corrMtx;
 var hypSampling = [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8];
-var circFocused;
 
 // --- utility functions
 function gdata(x)              { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
@@ -35,7 +39,8 @@ function forKey(x)             { return Object.entries(x) }                  // 
 // test3x3();
 
 
-// ---- main routines
+// ---- main routine
+
 d3.json("data/portfolioAssetsAndChracteristics_4.json",
   function(error, jData) {
 
@@ -95,18 +100,15 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           .text("1 Year Return %");
 
           
-      // 3) create circles for each asset at given risk,return coordinate, circle size = asset weight in portfolio
+      // 3) create circles for each asset at given return=x,risk=y coordinate, circle size = asset weight in portfolio
       var circleDrag = d3.behavior.drag()                                                          // drag on a circle
           .on("drag", function(d, i) {
               if (d[1].assetId!="p") {                                                             // can't stretch the 100% weight portfolio
-                  // kNum = d3.event.keyCode;
-                  // console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght+"keyCode"+kNum);
-                  if (d3.event.sourceEvent.shiftKey) {
+                  if (d3.event.sourceEvent.shiftKey) {                                             // kNum = d3.event.keyCode; // console.log("scatterPLot:d3.behavior.drag:deltaWght:"+deltaWght+"keyCode"+kNum);
                       d[1].oneYrRisk   += d3.event.dx /  100;
                       d[1].oneYrReturn += d3.event.dy / -100;
-                      curCirc = d3.select("circle."+d[1].assetId) // very weird way of getting the struct above "this"
-                      console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);                                            
-                      curCirc // re-assign same function to trigger display updates - no better way?
+                      curCirc = d3.select("circle."+d[1].assetId)                                  // the struct above "this" - no better way? // console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);                                            
+                      curCirc                                                                      // re-assign same functions to trigger display updates - no better way?
                           .attr("cx", ([k,r]) => { return scalerX(d[1].oneYrRisk)   })
                           .attr("cy", ([k,r]) => { return scalerY(d[1].oneYrReturn) });
                       // // tbd: re-assert n-1 line ends to move them
@@ -117,8 +119,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
                       //     .attr("y2",      function(d) { return scalerY(jData.pfData[d[1]].oneYrReturn)     })
 
                       // tbd: recalc and re-assert hyperbola
-                      hyperb = d3.select('path.frontier');
-                      hyperb.attr("d", lineFunction(calcPfRiskFromPfRtns(corr.mtx,
+                      d3.select('path.frontier').attr("d", lineFunction(calcPfRiskFromPfRtns(corr.mtx,      // redraw the changed hyperbola
                                                                          forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrReturn } ),
                                                                          forKey(jData.pfData).filter(([k,r]) => { return r.pfMemb==1}).map(([k,r]) => { return r.oneYrRisk   } ),
                                                                          hypSampling))); // the control points to get an svg "cardinal" to approximnate a hyperbola
@@ -165,7 +166,6 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           .style("stroke", "grey")
           .style("stroke-width", 2)
           .style("fill-opacity", 0.3)
-          .on("mouseover", function () { circFocused = this })      
           .call(circleDrag);
 
 
@@ -263,43 +263,6 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
           .style("text-anchor", "end")
           .text(function(d) { return d; });
   });
-
-// d3.select("body").on("keydown",
-//   function () { 
-//       d3.select(circFocused);                                      // the circle in which the mouse is
-//       kNum = d3.event.keyCode;
-//       delta = 0.02;
-//       var scalerX = d3.scale.linear().range([0, width]);
-//       var scalerY = d3.scale.linear().range([height, 0]);
-
-//       console.log("key="+kNum+":"+delta);      
-//       if      (kNum==37) { gdata(circFocused).oneYrRisk   += -delta; } // left 
-//       else if (kNum==39) { gdata(circFocused).oneYrRisk   +=  delta; } // right 
-//       else if (kNum==38) { gdata(circFocused).oneYrReturn +=  delta; } // up
-//       else if (kNum==40) { gdata(circFocused).oneYrReturn += -delta; } // down
-      
-//       //qq = d3.select(circFocused);
-//       //qq
-//       //    .attr("cx", ([k,r]) => { return scalerX(gdata(circFocused).oneYrRisk)/10.0 })
-//       //    .attr("cy", ([k,r]) => { return scalerY(gdata(circFocused).oneYrReturn)/ -1.0});
-      
-//       pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })          // get the other circles, just the assets in portfolio 
-//       rr = calcPfRiskEnRtn(corr.mtx,                                                           // compute new total portfolio risk & return
-//                            pfAssetElems[0].map(function(e) { return gdata(e).oneYrRisk }),     // <-- this has changed
-//                            pfAssetElems[0].map(function(e) { return gdata(e).oneYrReturn }),   // <-- or this has changed
-//                            pfAssetElems[0].map(function(e) { return gdata(e).assetWeight/wghtScaling }));          
-
-      
-//       totalPfCirc = d3.select('circle.p');                                                // get the total portfolio circle                 
-//       gdata(totalPfCirc[0][0]).oneYrRisk   = rr.rsk;// * wghtScaling;
-//       gdata(totalPfCirc[0][0]).oneYrReturn = rr.rtn;// * wghtScaling;
-
-//       // totalPfCirc                                                                         // re-assert to trigger update
-//       //     .attr("cx", ([k,r]) => { return scalerX(r.oneYrRisk) })
-//       //     .attr("cy", ([k,r]) => { return scalerY(r.oneYrReturn) });
-      
-//   });
-
 
 </script>
 
