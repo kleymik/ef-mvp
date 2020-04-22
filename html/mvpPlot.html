@@ -28,6 +28,7 @@ var corrMtx;
 var hypSampling = [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8];
 
 // --- utility functions
+
 function gdata(x)              { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
 function clamp(x, vMin, vMax)  { return Math.min(Math.max(x,  vMin), vMax) } // max & min threshold to dampen drift from rounding error
 function forKey(x)             { return Object.entries(x) }                  // c.f. python, get all (key & value)s out of a dict
@@ -52,7 +53,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
       pfAssetEls.forEach(function(d,i) {
           pfAssetEls.forEach(function(e,j)  {
-              if (i==j) { corrMtx[i][j] = 1.0; }
+              if (i==j) { corrMtx[i][j] = 1.0; }                                                 // identity diagonal
               else {
                   prId = d[0]+"-"+e[0]
                   if (prId in jData.corrTriang) { corrMtx[i][j] = corrMtx[j][i] = jData.corrTriang[prId]; } // symmetric off-diagonals
@@ -66,7 +67,7 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
       // 2) plot axes
       var color = d3.scale.category10();
 
-      var svgc = d3.select("body").append("svg")                                                   // svgc = svg Container
+      var svgc = d3.select("body").append("svg")                                                   // svgc = svg container
           .attr("width",  width  + margin.left + margin.right)
           .attr("height", height + margin.top  + margin.bottom)
           .append("g")
@@ -107,14 +108,14 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
 
                       d[1].oneYrRisk   += d3.event.dx /  100;
                       d[1].oneYrReturn += d3.event.dy / -100;
-                      curCirc = d3.select("circle."+d[1].assetId)                                         // the struct above "this" - no better way? // console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);
-                      curCirc                                                                             // re-assign same functions to trigger display updates - no better way?
-                          .attr("cx", ([k,r]) => { return scalerX(d[1].oneYrRisk)   })
+
+                      d3.select("circle."+d[1].assetId)                                                   // the struct above "this" - no better way? // console.log("SHIFT DRAG:"+"risk="+d[1].oneYrRisk+", rtn="+d[1].oneYrReturn);                      
+                          .attr("cx", ([k,r]) => { return scalerX(d[1].oneYrRisk)   })                    // re-assign same functions to trigger display updates - no better way?
                           .attr("cy", ([k,r]) => { return scalerY(d[1].oneYrReturn) });
                       
                       svgc.selectAll('line.corr-line')                                                    // too complex/crazy to selected affected lines, brute force, just do all of them
                           .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
-                          .attr("x1", function(e) { return scalerX(jData.pfData[e[0]].oneYrRisk)  })
+                          .attr("x1", function(e) { return scalerX(jData.pfData[e[0]].oneYrRisk)   })
                           .attr("y1", function(e) { return scalerY(jData.pfData[e[0]].oneYrReturn) })
                           .attr("x2", function(e) { return scalerX(jData.pfData[e[1]].oneYrRisk)   })
                           .attr("y2", function(e) { return scalerY(jData.pfData[e[1]].oneYrReturn) })
@@ -159,19 +160,19 @@ d3.json("data/portfolioAssetsAndChracteristics_4.json",
       svgc.selectAll(".dot")
           .data(forKey(jData.pfData))                                                            // document.querySelector("circle").__data__
           .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; })
-          .attr("pfMemb",  ([k,r]) => { return r.pfMemb                               })
-          .attr("class",   ([k,r]) => { return r.assetId                              })
-          .attr("myid",    ([k,r]) => { return r.assetId                              })
-          .attr("r",       ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) })         // use sqrt so that circle area is proportional to weight
-          .attr("cx",      ([k,r]) => { return scalerX(r.oneYrRisk)                   })
-          .attr("cy",      ([k,r]) => { return scalerY(r.oneYrReturn)                 })
-          .style("fill",   ([k,r]) => { return color(r.assetClass)                    })
+          .attr("pfMemb",        ([k,r]) => { return r.pfMemb                               })
+          .attr("class",         ([k,r]) => { return r.assetId                              })
+          .attr("myid",          ([k,r]) => { return r.assetId                              })
+          .attr("r",             ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) })         // use sqrt so that circle area is proportional to weight
+          .attr("cx",            ([k,r]) => { return scalerX(r.oneYrRisk)                   })
+          .attr("cy",            ([k,r]) => { return scalerY(r.oneYrReturn)                 })
+          .style("fill",         ([k,r]) => { return color(r.assetClass)                    })
+          .style("stroke-width", ([k,r]) => { return r.assetId=="p" ? 5 : 2                 })   // empahsize the total portfolo circle over it's constituent assets
           .style("stroke", "grey")
-          .style("stroke-width", 2)
           .style("fill-opacity", 0.3)
           .call(circleDrag);
 
-
+      //    .style("stroke-width", r.assetId=="p" ? 4 : 2)
       // 4) Create and append hyperbolic line element into svg group
       // this will not change when the asset weights change, only when the correlations change
       // hyperbola: compute x-values (returns) from y-values (risk) input data (since there can be two y values for a given x)
