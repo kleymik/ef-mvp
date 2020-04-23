@@ -1,50 +1,118 @@
-MVPVV  - Minimum Variance Portfolio Vary Visually
+
+ EFV - Efficient Frontier / Minimum Variance Portfoilio Visually
+================================================================
+
+2013-2020 Mike Kleyn
 
 mvp/lib           javascript
-mvp/3lib          third party javascript
-mvp/html          the web page
-mvp/html/data     the data read-in by the web page
+mvp/3lib          third party javascript kept copied here for convenience
+mvp/html          the web page and json data read-in by the web page
 mvp/logs          sample console log
+mvp/nb            Jupyter/sympy notebook (orignally SageMath/Cocalc)
 
 * To Run
-1) start webserver in directory mvp/lib
 
-Python3:  python -m http.server 2345
+1) start webserver in folder mvp/
 
-(Python2: python -m SimpleHTTPServer 2345)
-
-directory with JS code contains
-    mvp.js
-    lib/d3.v3.min.js
-    lib/numeric-1.2.6.min.js
-
-2) Open page html/scatterPlot.html
-
-it accesses data under html/data
+  e.g python3:  python -m http.server 2345
 
 
-* Derived from:
- mbostock’s block #3887118 Scatterplot
- June 9, 2013
+2) Open page html/mvpPlotFramed.html
+ it accesses json data file in same html folder
+ and JS code  in:
+    lib/mvp.js
+    3lib/d3.v3.min.js
+    3lib/numeric-1.2.6.min.js
 
+
+* Comments
+
+The hardest thing about this code is that it uses several languages each of which has its own conventions 
+and idiosyncracies in doing matrix/numeric calculations - they are:
+   python       - e.g. @ is the preferred matrix multiply operator
+   sympy        - e.g. * is the preferred matrix multiply operator
+   javascript/
+     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector [[1],[2],[3]] is a column vector.
+     Math       - e.g.
+and the referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" 
+ http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
+tends to use vectors of ones to express summations
+
+The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc
+
+
+* TBD
+
+** could use an sector of a circle to indicate correlation?
+semi-circle        => correl = -1.0
+right angle sector => correl =  0.0 
+epsilon segment    => correl =  0.999999
+
+var arcGenerator = d3.arc();
+ It can then be passed an object containing startAngle, endAngle, innerRadius and outerRadius properties to produce the path data:
+
+var pathData = arcGenerator({
+  startAngle: 0,
+  endAngle: 0.25 * Math.PI,
+  innerRadius: 50,
+  outerRadius: 100
+});
+
+** exact hyperbola via NURBS:
+https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
+
+
+* Derived From/Acknowledgements
+
+** Mike Bostock ’s (mbostock) block #3887118 Scatterplot June 9, 2013
  Open in a new window.
-
- This scatterplot is constructed from a TSV file storing the dimensions
- of sepals and petals of various iris flowers. The chart employs
- conventional margins and a number of D3 features:
-
+  This scatterplot is constructed from a TSV file storing the dimensions
+  of sepals and petals of various iris flowers. The chart employs
+  conventional margins and a number of D3 features:
     d3.tsv - load and parse data
     d3.scale.linear - x- and y-position encoding
     d3.scale.ordinal - color encoding
     d3.extent - compute domains
     d3.svg.axis - display axes
-
-index.html
+** numeric.js
+there may be better ones since this 2014 vintage js library
 
 
 * lognotes:
+20200414_12:33:20 more features working: correlation lines, hyperbola
 20200113_22:46:28 revived for move to git
 20171029_00:26:59 renamed to mvpVary
 20171029_00:02:56 latest version was in home/kleyn/Emp/tw20/projects/svnw/reactiveRrBubbleChart
 20171029_00:02:54 Used to be called reactiveRrBubbleChart
+20150102_12:33:01 Flesh out basic idea
+20130726_17:45:22 Basic Idea 
 
+
+* LICENSE
+
+Copyright (c) 2013-onwards, Mike Kleyn
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  *Redistributions of source code must retain the above copyright notice*, this
+  list of conditions and the following disclaimer.
+
+  *Redistributions in binary form must reproduce the above copyright notice*
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+ *The name Mike Kleyn may not be used to endorse or promote products*
+  derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL MICHAEL BOSTOCK BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
