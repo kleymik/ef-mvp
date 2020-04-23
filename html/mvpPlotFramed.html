@@ -21,7 +21,7 @@
 <body>
 
   <div class ='header'>
-    <h2> Interactive MVP Plot</h2>
+    <h2> EF-MVPIP: Efficient Fontier / Minimum-Variance Portfolio Interactive Plot</h2>
   </div>
 
   <div class ='mvp_plot1'>
@@ -29,14 +29,63 @@
   </div>
 
   <div class ='header'>
-    <h2> MVP Plot Description</h2>
-    <p> This plot shows a minimum variance portfolio.
-      The <i>area</i> (not the diameter) of each circle represents the weight the given asset in the portfolio.
-      The Total Portfolio (100% weight) in shown in red.
-      Drag on the circle to increase or decrease its size and hence the weight of that asset in the Portfolio.
+    <h3> EF-MVPIP Description</h3>
+    <p>
+      This plot shows the risk and return of a portfolio given the risks, returns, and weights of its constituent assets.
+
+      The <i>area</i> (not the diameter) of each circle represents the <i>weight</i> the given asset in the portfolio.
+      
+      The Total Portfolio (100% weight) is shown in <font color="red">red</font>.
+
+      <h4> Asset Weights </h4>
+    <p>
+      Dragging on the circle increases or decreases its size, and hence the weight of that asset in the Portfolio.
+      
       As the dragged asset's weight is decreased (increased), all other assets will have their weights increased (decreased) in equal measure.
+      
+    <p>
+      The <font color="blue">blue</font> curve is the hyperbola showing the minimum possible risk for a given desired return, the leftmost frontier of the Total Portfolio. The curve is fixed if it is only the asset proportions that is being varied.
+
+      <h4> Asset Risk and Return </h4>      
+    <p>
+      Holding down the <i>shift key</i> and dragging a circle will change the asset's risk (vertical) and/or return (horizontal) characteristics.
+
+      In this case, the efficient frontier curve is recomputed and so changes shape.
+
+    <h4> Asset Correlations </h4>            
+    <p>
+      The lines between the circles represent the correlations between the two assets at each end: <font color="red">red</font> if the pair are negative correlated, <font color="green">green</font> is they are postively correlated.
+
+      Dragging on line vertically will change the correlation between the two assets: <i>upward</i> increases the correlation (<i>towards 1.0</i>), <i>downward</i> decreases the correlation (<i>towards -1.0</i>).
+
+      In this case, the efficient frontier curve is recomputed and so changes shape.      
+
+    <h4> Initial Values </h4>                  
+    <p>
+      The initial risk, return, correlation, etc values of the portfolio's assets are kept in the file portfolioAssetsAndCharacteristics_4.json
+            
+    <h4> Details </h4>
+    <p>
+     The top-level d3.js calling code is in html/mvpPlot.html.
+     The accompanying jupyter/sympy python notebook illustrates the formulas to recompute the plot.
+    <h4> TBD </h4>
+    <p>
+      <ul>
+      <li>numerical stability check/limit, change js matrix library?</li>
+      <li>implement hyperbola as SVG NURB</li>
+      <li>bells and whistles</li>      
+  </ul>
+     
+
   </div>
-  
+    <div class ='header'>
+      <h3>Acknowledgements</h3>
+      <ul>
+      <li>the code uses <i>d3.js</i> and a library <i>numeric.js</i> for matrix computations in javascript.</li>
+      <li>the code was start by modifying an example scatterplot.js from Mike Bostock.</li>
+      </ul>
+
+     Mike Kleyn 2013-2020 
 </body>
 
 <!--
