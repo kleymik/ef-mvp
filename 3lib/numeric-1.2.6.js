@@ -32,7 +32,7 @@ numeric._myIndexOf = (function _myIndexOf(w) {
 numeric.myIndexOf = (Array.prototype.indexOf)?Array.prototype.indexOf:numeric._myIndexOf;
 
 numeric.Function = Function;
-numeric.precision = 8;  // mfk
+numeric.precision = 16;  // mfk
 numeric.largeArray = 50;
 
 numeric.prettyPrint = function prettyPrint(x) {
