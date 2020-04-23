@@ -1,7 +1,6 @@
 
- EFV - Efficient Frontier / Minimum Variance Portfoilio Visually
-================================================================
-
+ EF-MVP-IP - Efficient Frontier / Minimum Variance Portfoilio Interactive Plot
+==============================================================================
 2013-2020 Mike Kleyn
 
 mvp/lib           javascript
@@ -18,27 +17,28 @@ mvp/nb            Jupyter/sympy notebook (orignally SageMath/Cocalc)
 
 
 2) Open page html/mvpPlotFramed.html
+
  it accesses json data file in same html folder
  and JS code  in:
     lib/mvp.js
-    3lib/d3.v3.min.js
-    3lib/numeric-1.2.6.min.js
+    3lib/d3.v3.js         or d3.v3.min.js
+    3lib/numeric-1.2.6.js or numeric-1.2.6.min.js
 
 
 * Comments
 
-The hardest thing about this code is that it uses several languages each of which has its own conventions 
-and idiosyncracies in doing matrix/numeric calculations - they are:
+This repo uses several languages each of which has its own conventions 
+and idiosyncracies in doing matrix/numeric calculations:
    python       - e.g. @ is the preferred matrix multiply operator
    sympy        - e.g. * is the preferred matrix multiply operator
    javascript/
-     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector [[1],[2],[3]] is a column vector.
-     Math       - e.g.
-and the referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" 
+     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector, [[1],[2],[3]] is a column vector.
+
+The referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" 
  http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
 tends to use vectors of ones to express summations
 
-The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc
+The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc.
 
 
 * TBD
@@ -79,6 +79,8 @@ there may be better ones since this 2014 vintage js library
 
 
 * lognotes:
+20200423_18:17:57 changed precision in numeric.js, but TBD in numeric.min.js
+20200423_18:17:31 tidy before upload
 20200414_12:33:20 more features working: correlation lines, hyperbola
 20200113_22:46:28 revived for move to git
 20171029_00:26:59 renamed to mvpVary
