@@ -193,7 +193,7 @@ sym.factor(ws['sigamEqn'] - sym.factor(ws['sigamEqn']))
 # ## 3 numerical example <a class="anchor" id="3"></a>
 # Calculate A, B, C, & D, hence $\sigma$ and $\mu$, for a small example of 3 assets
 #
-# sample annualized expected returns, in perone units:
+# sample annualized expected returns, in percent:
 
 # %% pycharm={"is_executing": false}
 ws['prec'] = 4 # number of digits of precision to display numerical values
@@ -242,12 +242,12 @@ sym.diag(*ws['vol3'])**2   # how to do sqrt of diagonal matrix in sympy???
 # in index subscript form:
 # $$ r_{ij} = \frac{c_{ij}}{c_{ii}*c_{jj}}$$
 #
-# in matrix algebra form: $$ cor3 = vol3^{-1}  \times cov \times  vol3^{-1} $$ 
+# in matrix form: $$ cor = vol^{-1}  \times cov \times  vol^{-1} $$
 #
-# where $$ vol3 = \sqrt{diag(cov3)} $$ as a diagonal matrix
+# where $$ vol = \sqrt{diag(cov)} $$ as a diagonal matrix
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# *vol3*:
+# *vol*:
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
 ws['oneOverVol'] = sym.diag(*ws['cov3'].diagonal())**(-0.5) # works!!!! using sym.sqrt doesn't evaluate fully
@@ -274,13 +274,13 @@ ws['ones3'] = sym.Matrix([1,1,1])
 ws['ones3']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# inverse of *cov3*
+# inverse of *cov*
 
 # %% pycharm={"name": "#%%\n", "is_executing": false}
 sym.N(ws['cov3']**(-1), ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
-# check condition number of *cov3* inverse:
+# check condition number of *cov* inverse:
 
 # %% pycharm={"is_executing": false}
 sym.N(LA.cond(np.array(ws['cov3']**(-1), dtype=float)), ws['prec']) 
