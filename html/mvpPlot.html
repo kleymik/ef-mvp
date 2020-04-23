@@ -8,30 +8,27 @@
 </style>
 
 <body>
-<script src="http://localhost:2345/3lib/d3.v3.js"></script>
-<script src="http://localhost:2345/3lib/numeric-1.2.6.js"></script>
-<script src="http://localhost:2345/lib/mvp.js"></script>
-<script>
 
-// stackoverflow: where this currently running script came from:
-//  current address             var url = window.location.href
-//  Then just parse that string var arr = url.split("/");
-//  your url is:                var result = arr[0] + "//" + arr[2]
+<script src="../3lib/d3.v3.js"></script>
+<script src="../3lib/numeric-1.2.6.js"></script>
+<script src="../lib/mvp.js"></script>
+
+<script>    
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width  = 960 - margin.left - margin.right,
+    width  = 800 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var wghtScaling =   20.0;
-var corrScaling = -200.0;  // down to move correlation towards -1, up to move correlation towards +1
+var corrScaling = -200.0;  // down to move correlation towards -1.0, up to move correlation towards +1.0
 var corrMtx;
-var hypSampling = [0.0, 0.1, 0.2, 0.3, 0.6, 0.9, 0.95, 0.97, 0.99, 1, 1.1, 2, 2.5, 3, 4, 5, 6, 7, 8];
+var hypSampling = [-0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
 
 // --- utility functions
 
-function gdata(x)              { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
-function clamp(x, vMin, vMax)  { return Math.min(Math.max(x,  vMin), vMax) } // max & min threshold to dampen drift from rounding error
-function forKey(x)             { return Object.entries(x) }                  // c.f. python, get all (key & value)s out of a dict
+function gdata(x)             { return x.__data__[1] }                      // a common accessor pattern: return the underlying domain object from its associated d3 graphical element
+function clamp(x, vMin, vMax) { return Math.min(Math.max(x,  vMin), vMax) } // max & min threshold to dampen drift from rounding error
+function forKey(x)            { return Object.entries(x) }                  // c.f. python, get all (key & value)s out of a dict
 
 
 // --- some testing of the mvp.js functions
@@ -39,10 +36,9 @@ function forKey(x)             { return Object.entries(x) }                  // 
 // test2x2();
 // test3x3();
 
-
 // ---- main routine
 
-d3.json("portfolioAssetsAndChracteristics_4.json",                                               // in same folder as this html
+d3.json("portfolioAssetsAndCharacteristics_4.json",                                              // in same folder as this html
   function(error, jData) {
 
       // 1) populate correlation matrix from list of pair-wise correlations
@@ -62,19 +58,19 @@ d3.json("portfolioAssetsAndChracteristics_4.json",                              
       })
 
       hdr = {}; pfAssetEls.forEach(function(q,i) { hdr[q[0]] = i });
-      corr = { "hdrs": hdr, "mtx": corrMtx}                                                        // add asset-id index into corr matrix
+      corr = { "hdrs": hdr, "mtx": corrMtx}                                                      // add asset-id index into corr matrix
       
       // 2) plot axes
       var color = d3.scale.category10();
 
-      var svgc = d3.select("body").append("svg")                                                   // svgc = svg container
+      var svgc = d3.select("body").append("svg")                                                 // svgc = svg container
           .attr("width",  width  + margin.left + margin.right)
           .attr("height", height + margin.top  + margin.bottom)
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       var scalerX = d3.scale.linear().range([0, width]);
-      scalerX.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrRisk })).nice();   // unpacking dict key-values into array for d3.extent()
+      scalerX.domain(d3.extent(forKey(jData.pfData), ([k,r]) => { return r.oneYrRisk })).nice(); // unpacking dict key-values into array for d3.extent()
       var xAxis = d3.svg.axis().scale(scalerX).orient("bottom");
       svgc.append("g").attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
@@ -113,7 +109,7 @@ d3.json("portfolioAssetsAndChracteristics_4.json",                              
                           .attr("cx", ([k,r]) => { return scalerX(d[1].oneYrRisk)   })                    // re-assign same functions to trigger display updates - no better way?
                           .attr("cy", ([k,r]) => { return scalerY(d[1].oneYrReturn) });
                       
-                      svgc.selectAll('line.corr-line')                                                    // too complex/crazy to selected affected lines, brute force, just do all of them
+                      svgc.selectAll('line.corr-line')                                                    // too complex/crazy to select affected lines, so brute force, just do all of them
                           .data(forKey(jData.corrTriang).map(([idPair,corr]) => { return [idPair.split("-")[0], idPair.split("-")[1], corr] }) )
                           .attr("x1", function(e) { return scalerX(jData.pfData[e[0]].oneYrRisk)   })
                           .attr("y1", function(e) { return scalerY(jData.pfData[e[0]].oneYrReturn) })
@@ -131,7 +127,7 @@ d3.json("portfolioAssetsAndChracteristics_4.json",                              
                       deltaWght = (d3.event.dx+d3.event.dy) / 4;
                       pfAssetElems = d3.selectAll("circle").filter(([k,r]) => { return r.pfMemb==1 })     // get the other circles, just the assets in portfolio
                       numOtherAssets = pfAssetElems[0].length-1;                                          // downweight the non-selected assest equally
-                      pfAssetElems[0].forEach(function(e) {                                               // update their data                 // 3% < weight < 97% to avoid numerical inaccuracy
+                      pfAssetElems[0].forEach(function(e) {                                               // update their data      3% < weight < 97% to avoid numerical inaccuracy
                           if (d[1].assetId==e.getAttribute("myid")) { gdata(e).assetWeight = clamp(gdata(e).assetWeight + deltaWght,                3, 97); }
                           else                                      { gdata(e).assetWeight = clamp(gdata(e).assetWeight - deltaWght/numOtherAssets, 3, 97); }  // downweight the rest in equal proportions
                       });
@@ -158,16 +154,16 @@ d3.json("portfolioAssetsAndChracteristics_4.json",                              
       // SVG Graphical Circle Element: one circle for each asset + one for the whole portfolio that is the sum of the size of the portfolio's assets
       // approximate path expression: svgc[0].g.children[2].circle.attributes.pfMemb
       svgc.selectAll(".dot")
-          .data(forKey(jData.pfData))                                                            // document.querySelector("circle").__data__
-          .enter().append('circle')                                                              // circle.each(function(d) { d.element = this; })
+          .data(forKey(jData.pfData))                                                          // document.querySelector("circle").__data__
+          .enter().append('circle')                                                            // circle.each(function(d) { d.element = this; })
           .attr("pfMemb",        ([k,r]) => { return r.pfMemb                               })
           .attr("class",         ([k,r]) => { return r.assetId                              })
           .attr("myid",          ([k,r]) => { return r.assetId                              })
-          .attr("r",             ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) })         // use sqrt so that circle area is proportional to weight
+          .attr("r",             ([k,r]) => { return Math.sqrt(r.assetWeight * wghtScaling) }) // use sqrt so that circle area is proportional to weight
           .attr("cx",            ([k,r]) => { return scalerX(r.oneYrRisk)                   })
           .attr("cy",            ([k,r]) => { return scalerY(r.oneYrReturn)                 })
           .style("fill",         ([k,r]) => { return color(r.assetClass)                    })
-          .style("stroke-width", ([k,r]) => { return r.assetId=="p" ? 5 : 2                 })   // empahsize the total portfolo circle over it's constituent assets
+          .style("stroke-width", ([k,r]) => { return r.assetId=="p" ? 5 : 2                 }) // empahsize the total portfolo circle over it's constituent assets
           .style("stroke", "grey")
           .style("fill-opacity", 0.3)
           .call(circleDrag);
