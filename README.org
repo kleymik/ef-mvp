@@ -3,11 +3,12 @@
 ==============================================================================
 2013-2020 Mike Kleyn
 
-mvp/lib    javascript
-mvp/3lib   third party javascript kept copied here for convenience
-mvp/html   the web page and json data read-in by the web page
-mvp/logs   sample console log
-mvp/nb     Jupyter/sympy notebook (orignally SageMath/Cocalc)
+mvp/ef-mvp-ip.gif  gif animation of d3 interaction
+mvp/lib            javascript
+mvp/3lib           third party javascript kept copied here for convenience
+mvp/html           the web page and json data read-in by the web page
+mvp/logs           sample console log
+mvp/nb             Jupyter/sympy notebook (originally SageMath/Cocalc)
 
 * To Run
 
@@ -24,7 +25,7 @@ mvp/nb     Jupyter/sympy notebook (orignally SageMath/Cocalc)
     3lib/d3.v3.js         or d3.v3.min.js
     3lib/numeric-1.2.6.js or numeric-1.2.6.min.js
 
-
+   
 * Comments
 
 This repo uses several languages each of which 
@@ -62,8 +63,10 @@ var pathData = arcGenerator({
 });
 
 ** exact hyperbola via NURBS:
+
 https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
 
+** in notenook, put sympy symbols in the ws workspace
 
 * Derived From/Acknowledgements
 
