@@ -3,11 +3,11 @@
 ==============================================================================
 2013-2020 Mike Kleyn
 
-mvp/lib           javascript
-mvp/3lib          third party javascript kept copied here for convenience
-mvp/html          the web page and json data read-in by the web page
-mvp/logs          sample console log
-mvp/nb            Jupyter/sympy notebook (orignally SageMath/Cocalc)
+mvp/lib    javascript
+mvp/3lib   third party javascript kept copied here for convenience
+mvp/html   the web page and json data read-in by the web page
+mvp/logs   sample console log
+mvp/nb     Jupyter/sympy notebook (orignally SageMath/Cocalc)
 
 * To Run
 
@@ -27,12 +27,15 @@ mvp/nb            Jupyter/sympy notebook (orignally SageMath/Cocalc)
 
 * Comments
 
-This repo uses several languages each of which has its own conventions 
-and idiosyncracies in doing matrix/numeric calculations:
+This repo uses several languages each of which 
+has its own conventions and idiosyncracies 
+in doing matrix/numeric calculations:
+
    python       - e.g. @ is the preferred matrix multiply operator
    sympy        - e.g. * is the preferred matrix multiply operator
    javascript/
-     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector, [[1],[2],[3]] is a column vector.
+     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector, 
+                                                         [[1],[2],[3]] is a column vector.
 
 The referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" 
  http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
@@ -78,7 +81,7 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
 there may be better ones since this 2014 vintage js library
 
 
-* lognotes:
+* Log Notes:
 20200423_18:17:57 changed precision in numeric.js, but TBD in numeric.min.js
 20200423_18:17:31 tidy before upload
 20200414_12:33:20 more features working: correlation lines, hyperbola
