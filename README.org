@@ -19,27 +19,27 @@ mvp/nb             Jupyter/sympy notebook (originally SageMath/Cocalc)
 
 2) Open page html/mvpPlotFramed.html
 
- it accesses json data file in same html folder
+ it reads the json data file in same html folder
  and JS code  in:
     lib/mvp.js
     3lib/d3.v3.js         or d3.v3.min.js
     3lib/numeric-1.2.6.js or numeric-1.2.6.min.js
 
-   
+
 * Comments
 
-This repo uses several languages each of which 
-has its own conventions and idiosyncracies 
+This repo uses several languages each of which
+has its own conventions and idiosyncracies
 in doing matrix/numeric calculations:
 
    python       - e.g. @ is the preferred matrix multiply operator
    sympy        - e.g. * is the preferred matrix multiply operator
    javascript/
-     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector, 
+     numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector,
                                                          [[1],[2],[3]] is a column vector.
 
-The referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper" 
- http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf 
+The referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper"
+ http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf
 tends to use vectors of ones to express summations
 
 The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc.
@@ -49,7 +49,7 @@ The sympy notebook was translated from the original version done in the very nic
 
 ** could use an sector of a circle to indicate correlation?
 semi-circle        => correl = -1.0
-right angle sector => correl =  0.0 
+right angle sector => correl =  0.0
 epsilon segment    => correl =  0.999999
 
 var arcGenerator = d3.arc();
@@ -93,7 +93,7 @@ there may be better ones since this 2014 vintage js library
 20171029_00:02:56 latest version was in home/kleyn/Emp/tw20/projects/svnw/reactiveRrBubbleChart
 20171029_00:02:54 Used to be called reactiveRrBubbleChart
 20150102_12:33:01 Flesh out basic idea
-20130726_17:45:22 Basic Idea 
+20130726_17:45:22 Basic Idea
 
 
 * LICENSE
@@ -106,10 +106,6 @@ modification, are permitted provided that the following conditions are met:
 
   *Redistributions of source code must retain the above copyright notice*, this
   list of conditions and the following disclaimer.
-
-  *Redistributions in binary form must reproduce the above copyright notice*
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
 
  *The name Mike Kleyn may not be used to endorse or promote products*
   derived from this software without specific prior written permission.

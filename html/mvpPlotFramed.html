@@ -14,39 +14,39 @@
   <div class ='header'>
     <h3> EF-MVP-IP Description</h3>
     <p>
-      This plot shows the risk and return of a portfolio given the risks, returns, and weights of its constituent assets (four in this example).
+      This X-Y plot shows the risk(X) and return(Y) of a portfolio given the risks, returns, and weights of its constituent assets (four in this example).
 
       The <i>area</i> (not the diameter) of each circle represents the <i>weight</i> the given asset in the portfolio.
-      
+
       The Total Portfolio (100% weight) is the fifth circle, shown in <font color="red">red</font>.
 
       <h4> Asset Weights </h4>
     <p>
-      Dragging on the circle increases or decreases its size, and hence the weight of that asset in the Portfolio.
-      
-      As the dragged asset's weight is decreased (increased), all other assets will have their weights increased (decreased) in equal measure.
-      
-    <p>
-      The <font color="blue">blue</font> curve is the hyperbola showing the minimum possible risk for a given desired return, the leftmost frontier of the Total Portfolio. The curve is fixed if it is only the asset proportions that is being varied.
+      <b>Dragging</b> on the circle increases or decreases its size, and hence the weight of that asset in the Portfolio.
 
-      <h4> Asset Risk and Return </h4>      
+      As the dragged asset's weight is decreased (increased), all other assets will have their weights increased (decreased) in equal measure.
+
     <p>
-      Holding down the <i>shift key</i> and dragging a circle will change the asset's risk (vertical) and/or return (horizontal) characteristics.
+      The <font color="blue">blue</font> curve is the hyperbola showing the minimum possible risk for a given desired return, the leftmost frontier of the Total Portfolio. The curve remains fixed if it is only the asset weight proportions that is being varied by dragging their sizes.
+
+      <h4> Asset Risk and Return </h4>
+    <p>
+      Holding down the <i>shift key</i> and <b>dragging</b> a circle will change the asset's risk (horizontal) and/or return (vertical) characteristics.
 
       In this case, the efficient frontier curve is recomputed and so changes shape.
 
-    <h4> Asset Correlations </h4>            
+    <h4> Asset Correlations </h4>
     <p>
       The lines between the circles represent the correlations between the two assets at each end: <font color="red">red</font> if the pair are negative correlated, <font color="green">green</font> is they are postively correlated.
 
-      Dragging on line vertically will change the correlation between the two assets: <i>upward</i> increases the correlation (towards <i>+1.0</i>), <i>downward</i> decreases the correlation (towards <i>-1.0</i>).
+      <b>Dragging</b> on the line vertically will change the correlation between the two assets: <i>upward</i> increases the correlation (towards <i>+1.0</i>), <i>downward</i> decreases the correlation (towards <i>-1.0</i>).
 
-      In this case, the efficient frontier curve is recomputed and so changes shape.      
+      In this case, the efficient frontier curve is recomputed and so changes shape.
 
-    <h4> Initial Values </h4>                  
+    <h4> Initial Values </h4>
     <p>
       The initial risk, return, correlation, etc values of the portfolio's assets are kept in the file portfolioAssetsAndCharacteristics_4.json
-            
+
     <h4> Details </h4>
     <p>
      The top-level d3.js calling code is in html/mvpPlot.html.
@@ -56,9 +56,9 @@
       <ul>
       <li>numerical stability check/limit, change js matrix library?</li>
       <li>implement hyperbola as SVG NURB</li>
-      <li>bells and whistles</li>      
+      <li>bells and whistles</li>
   </ul>
-     
+
 
   </div>
     <div class ='header'>
@@ -68,7 +68,7 @@
       <li>the code was start by modifying an example scatterplot.js from Mike Bostock.</li>
       </ul>
 
-     Mike Kleyn 2013-2020 
+     Mike Kleyn 2013-2020
 </body>
 
 <!--
@@ -80,6 +80,6 @@ In order to get something to show up within the embedded iframe, you have to fir
 let doc = document.getElementById("content").contentDocument;
 The “contentDocument” is then what you can use to pass to the “select” method of D3.js.
 
-d3.select(doc); 
+d3.select(doc);
 // continue rest of D3.js code
 -->
