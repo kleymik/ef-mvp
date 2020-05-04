@@ -50,9 +50,9 @@ tends to use vectors of ones to express summations
 The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc.
 
 
-* TBD
+** TBD
 
-** could use an sector of a circle to indicate correlation?
+*** could use an sector of a circle to indicate correlation?
 semi-circle        => correl = -1.0
 right angle sector => correl =  0.0
 epsilon segment    => correl =  0.999999
@@ -67,7 +67,7 @@ var pathData = arcGenerator({
   outerRadius: 100
 });
 
-** exact hyperbola via NURBS:
+*** exact hyperbola via NURBS:
 
 https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
 
