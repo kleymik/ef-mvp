@@ -3,12 +3,17 @@
 ==============================================================================
 2013-2020 Mike Kleyn
 
-mvp/ef-mvp-ip.gif  gif animation of d3 interaction
-mvp/lib            javascript
-mvp/3lib           third party javascript kept copied here for convenience
-mvp/html           the web page and json data read-in by the web page
-mvp/logs           sample console log
-mvp/nb             Jupyter/sympy notebook (originally SageMath/Cocalc)
+- mvp/ef-mvp-ip.gif  gif animation of d3 interaction
+
+- mvp/lib            javascript
+
+- mvp/3lib           third party javascript kept copied here for convenience
+
+- mvp/html           the web page and json data read-in by the web page
+
+- mvp/logs           sample console log
+
+- mvp/nb             Jupyter/sympy notebook (originally SageMath/Cocalc)
 
 * To Run
 
