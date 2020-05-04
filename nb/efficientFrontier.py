@@ -91,7 +91,7 @@ ws
 #
 # $V$ = covariance matrix
 #
-# $\mathbf{1}$ = Identity Matrix
+# $$\mathbf{1} = Identity Matrix $$
 #
 # $e^{T}$ = $e$ transpose
 #
@@ -159,27 +159,27 @@ ws
 #
 # take positive solution only
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 mu, sigma, A, B, C, D = sym.symbols('mu sigma A B C D')
 ws['sigmaEqn'] = sym.solve(sym.Eq( (sigma**2 / (1/C)) - ((mu - A/C)**2 / (D / C**2)), 1) , sigma)[1] # [1]=> +ve soln
 ws['sigmaEqn']
 
-# %% [markdown] pycharm={"name": "#%% md\n", "is_executing": false}
+# %% [markdown] pycharm={"is_executing": false, "name": "#%% md\n"}
 # simplify:
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 sym.factor(sym.Eq(sigma, ws['sigmaEqn']))
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # check: [original form] minus [simplified ("factored") form]:
 
-# %% pycharm={"name": "#%% \n"}
-ws['sigmaEqn'] - sA,sB,sC,sD(ws['sigmaEqn'])
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%% \n"}
+ws['sigmaEqn'] - ws['sigmaEqn']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # gives:
 
-# %% pycharm={"name": "#%% \n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%% \n"}
 sym.factor(ws['sigmaEqn'] - sym.factor(ws['sigmaEqn']))
 
 # %% [markdown]
@@ -191,9 +191,7 @@ sym.factor(ws['sigmaEqn'] - sym.factor(ws['sigmaEqn']))
 # %%
 ws['prec'] = 4 # number of digits of precision to display numerical values
 
-#ws['mu3'] = sym.Matrix(np.array([0.1, 0.05, 0.03]).T) # mu3 = sym.Matrix(mu3)
 ws['mu3'] = sym.Matrix(np.array([5.1, 7.0, 0.9]).T) # mu3 = sym.Matrix(mu3)
-
 ws['mu3']
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
@@ -222,7 +220,7 @@ sym.N(ws['cov3'], ws['prec'])
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # check that $${variance} = vol^2$$, $$diag(cov) = vol^2$$
 
-# %% pycharm={"name": "#%% \n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%% \n"}
 sym.diag(*ws['vol3'])**2   # how to do sqrt of diagonal matrix in sympy?
 
 # %% [markdown] pycharm={"is_executing": false, "name": "#%% md\n"}
@@ -237,7 +235,7 @@ sym.diag(*ws['vol3'])**2   # how to do sqrt of diagonal matrix in sympy?
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # *vol*:
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 ws['oneOverVol'] = sym.diag(*ws['cov3'].diagonal())**(-0.5) # works!!!! using sym.sqrt doesn't evaluate fully
 ws['oneOverVol'] * ws['cov3'] * ws['oneOverVol']            # oneOverVol is diagonal matrix so it's equal to its transpose
 
@@ -257,7 +255,7 @@ ws['ones3']
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # inverse of *cov*
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 sym.N(ws['cov3']**(-1), ws['prec'])
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
@@ -267,7 +265,7 @@ sym.N(ws['cov3']**(-1), ws['prec'])
 sym.N(LA.cond(np.array(ws['cov3']**(-1), dtype=float)), ws['prec']) 
 
 # %% [markdown]
-# calculate $A$ from covariance $V (=cov)$, and $e (=mu)$ : $ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $
+# calculate $A$ from covariance $V (=cov)$, and $e (=mu)$ : $$ A = \mathbf{1}^T V^{-1} e = e^T V^{-1}\mathbf{1} $$
 
 # %%
 ws['a'] = ws['ones3'].T @ ws['cov3']**(-1) @ ws['mu3'] # = (mu3.T @ cov3**(-1) @ ones3.T)
@@ -281,7 +279,7 @@ ws['b'] = ws['mu3'].T @ ws['cov3']**(-1) @ ws['mu3']
 sym.N(ws['b'], ws['prec'])
 
 # %% [markdown]
-# calculate $C$ from covariance $V (=cov) : C = \mathbf{1}^T V^{-1} \mathbf{1}$
+# calculate $C$ from covariance $$V (=cov) : C = \mathbf{1}^T V^{-1} \mathbf{1}$$
 
 # %%
 ws['c']  = ws['ones3'].T @ ws['cov3']**(-1) @ ws['ones3']
@@ -298,13 +296,13 @@ sym.N(ws['d'], ws['prec'])
 # #### 3.2 hence calculate $\sigma$ or $\mu$
 # using $A, B, C, D$ calculate $\sigma$ and $\mu$ from each other
 #
-# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
+# $$ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $$
 # and
-# $ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $
+# $$ \mu    =    \frac{\sqrt{D(\sigma^2 C - 1)}+A}{C} $$
 #
 # e.g. for $\mu = 0.3$, $\sigma =$ 
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 ws['sgma'] = ( (ws['d'] + (0.03 * ws['c'] - ws['a'])**2) / (ws['c']*ws['d']) )**(0.5)
 sym.N(ws['sgma'], ws['prec'])
 
@@ -318,7 +316,7 @@ print('mu from sigma)')
 
 #sym.N(m, sPrec)
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 # mimimum: 
 print("sigma, mu")
 ( (sym.Matrix([1]) / ws['c'])**(0.5), ws['a'] / ws['c'] )
@@ -328,13 +326,13 @@ print("sigma, mu")
 #
 # sigma vs mu:
 #
-# $ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $
+# $$ \sigma =   \sqrt{\frac{D + (\mu C - A)^2}{CD}} $$
 #
 
 # %% [markdown]
 # mu vs sigma
 #  
-# $ \mu = \frac{A+\sqrt{D(\sigma^2 C - 1)}}{C} $
+# $$ \mu = \frac{A+\sqrt{D(\sigma^2 C - 1)}}{C} $$
 
 # %%
 symOne = sym.Matrix([[1]]) # just 1 in a sympy 1x1 Matrix
@@ -371,16 +369,16 @@ V
 # %%
 V**(-1)
 
-# %% [markdown] pycharm={"name": "#%% md\n", "is_executing": false}
+# %% [markdown] pycharm={"is_executing": false, "name": "#%% md\n"}
 # check multiply: $V \times V^{-1}$
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 sym.MatMul(V, V.inv(),doit=False) 
 
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # **=** 
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 sym.simplify(V @ V.inv())
 
 # %%
@@ -420,7 +418,7 @@ sB = E.T @ V.inv() @ E
 sB
 
 # %% [markdown]
-# $ C = \mathbf{1}^T V^{-1} \mathbf{1} = $
+# $$ C = \mathbf{1}^T V^{-1} \mathbf{1} = $$
 
 # %%
 sC = ws['ones3'].T @ V.inv() @ ws['ones3']
@@ -433,7 +431,7 @@ sC
 sD = sB @ sC - sA**2
 sD
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 # hmmmm
 sym.factor(sD)
 
@@ -441,7 +439,7 @@ sym.factor(sD)
 # %% [markdown] pycharm={"name": "#%% md\n"}
 # workspace final contents:
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 ws['dateEnd'] = datetime.datetime.now().isoformat()[:16].replace(':','')
 
 for k in sorted(ws): print("%10s" % k, type(ws[k]))
@@ -450,6 +448,6 @@ for k in sorted(ws): print("%10s" % k, type(ws[k]))
 
 
 
-# %% pycharm={"name": "#%%\n"}
+# %% jupyter={"outputs_hidden": false} pycharm={"name": "#%%\n"}
 
 
