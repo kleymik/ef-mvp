@@ -85,8 +85,14 @@ https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
     d3.scale.ordinal - color encoding
     d3.extent - compute domains
     d3.svg.axis - display axes
-** numeric.js
-there may be better ones since this 2014 vintage js library
+
+** Sébastien Loisel's numeric.js
+
+local copy for convenience
+
+https://github.com/sloisel/numeric
+
+there may be better ones since this 2014? vintage js library
 
 
 * Log Notes:
