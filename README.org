@@ -3,6 +3,9 @@
 ==============================================================================
 2013-2020 Mike Kleyn
 
+#+caption: Demo
+[[file:./ef-mvp-ip.gif]]
+
 - mvp/ef-mvp-ip.gif  gif animation of d3 interaction
 
 - mvp/lib            javascript
@@ -29,7 +32,6 @@
     lib/mvp.js
     3lib/d3.v3.js         or d3.v3.min.js
     3lib/numeric-1.2.6.js or numeric-1.2.6.min.js
-
 
 * Comments
 
@@ -96,15 +98,15 @@ there may be better ones since this 2014? vintage js library
 
 
 * Log Notes:
-20200423_18:17:57 changed precision in numeric.js, but TBD in numeric.min.js
-20200423_18:17:31 tidy before upload
-20200414_12:33:20 more features working: correlation lines, hyperbola
-20200113_22:46:28 revived for move to git
-20171029_00:26:59 renamed to mvpVary
-20171029_00:02:56 latest version was in home/kleyn/Emp/tw20/projects/svnw/reactiveRrBubbleChart
-20171029_00:02:54 Used to be called reactiveRrBubbleChart
-20150102_12:33:01 Flesh out basic idea
-20130726_17:45:22 Basic Idea
+| 20200423_18:17:57 | changed precision in numeric.js, but TBD in numeric.min.js                    |
+| 20200423_18:17:31 | tidy before upload                                                            |
+| 20200414_12:33:20 | more features working: correlation lines, hyperbola                           |
+| 20200113_22:46:28 | revived for move to git                                                       |
+| 20171029_00:26:59 | renamed to mvpVary                                                            |
+| 20171029_00:02:56 | latest version was in home/kleyn/Emp/tw20/projects/svnw/reactiveRrBubbleChart |
+| 20171029_00:02:54 | Used to be called reactiveRrBubbleChart                                       |
+| 20150102_12:33:01 | Flesh out basic idea                                                          |
+| 20130726_17:45:22 | Basic Idea                                                                    |
 
 
 * LICENSE
