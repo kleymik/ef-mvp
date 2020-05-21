@@ -1,5 +1,5 @@
 
- EF-MVP-IP - Efficient Frontier / Minimum Variance Portfoilio Interactive Plot
+ EF-MVP-IP - Efficient Frontier / Minimum Variance Portfolio Interactive Plot
 ==============================================================================
 2013-2020 Mike Kleyn
 
