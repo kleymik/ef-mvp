@@ -55,9 +55,11 @@ The sympy notebook was translated from the original version done in the very nic
 ** TBD
 
 *** could use an sector of a circle to indicate correlation?
+#+BEGIN_SRC
 semi-circle        => correl = -1.0
 right angle sector => correl =  0.0
 epsilon segment    => correl =  0.999999
+#+END_SRC
 
 var arcGenerator = d3.arc();
  It can then be passed an object containing startAngle, endAngle, innerRadius and outerRadius properties to produce the path data:
@@ -73,7 +75,7 @@ var pathData = arcGenerator({
 
 https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
 
-** in notenook, put sympy symbols in the ws workspace
+*** in notebook, put sympy symbols in the ws workspace
 
 * Derived From/Acknowledgements
 
