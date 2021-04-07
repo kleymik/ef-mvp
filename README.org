@@ -7,43 +7,40 @@
 [[file:./ef-mvp-ip.gif]]
 
 - mvp/ef-mvp-ip.gif  gif animation of d3 interaction
-
 - mvp/lib            javascript
-
 - mvp/3lib           third party javascript kept copied here for convenience
-
 - mvp/html           the web page and json data read-in by the web page
-
 - mvp/logs           sample console log
-
 - mvp/nb             Jupyter/sympy notebook (originally SageMath/Cocalc)
 
 * To Run
 
 1) start webserver in folder mvp/
 
-  e.g python3:  python -m http.server 2345
+  e.g. python3:  python -m http.server 2345
 
 
 2) Open page html/mvpPlotFramed.html
 
- it reads the json data file in same html folder
- and JS code  in:
+it reads the json data file in same html folder and the js code in:
+#+BEGIN_SRC
     lib/mvp.js
     3lib/d3.v3.js         or d3.v3.min.js
     3lib/numeric-1.2.6.js or numeric-1.2.6.min.js
+#+END_SRC
 
 * Comments
 
 This repo uses several languages each of which
 has its own conventions and idiosyncracies
 in doing matrix/numeric calculations:
-
+#+BEGIN_SRC
    python       - e.g. @ is the preferred matrix multiply operator
    sympy        - e.g. * is the preferred matrix multiply operator
    javascript/
      numeric.js - e.g. nested arrays are used row-major: [1,2,3] is a row vector,
                                                          [[1],[2],[3]] is a column vector.
+#+END_SRC
 
 The referenced paper (Beste, Leventhal, Williams, & Dr. Qin Lu "Markowitz Review Paper"
  http://ramanujan.math.trinity.edu/tumath/research/studpapers/s21.pdf
@@ -52,7 +49,28 @@ tends to use vectors of ones to express summations
 The sympy notebook was translated from the original version done in the very nice SageMath=Cocalc.
 
 
-** TBD
+* Derived From/Acknowledgements
+
+** Mike Bostock’s (mbostock) block #3887118 Scatterplot June 9, 2013
+ Open in a new window.
+  This scatterplot is constructed from a TSV file storing the dimensions
+  of sepals and petals of various iris flowers. The chart employs
+  conventional margins and a number of D3 features:
+- d3.tsv - load and parse data
+- d3.scale.linear - x- and y-position encoding
+- d3.scale.ordinal - color encoding
+- d3.extent - compute domains
+- d3.svg.axis - display axes
+
+** Sébastien Loisel's numeric.js
+
+local copy for convenience
+
+https://github.com/sloisel/numeric
+
+there may be better ones since this 2014? vintage js library
+
+* TBD
 
 *** could use an sector of a circle to indicate correlation?
 #+BEGIN_SRC
@@ -76,27 +94,6 @@ var pathData = arcGenerator({
 https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html
 
 *** in notebook, put sympy symbols in the ws workspace
-
-* Derived From/Acknowledgements
-
-** Mike Bostock ’s (mbostock) block #3887118 Scatterplot June 9, 2013
- Open in a new window.
-  This scatterplot is constructed from a TSV file storing the dimensions
-  of sepals and petals of various iris flowers. The chart employs
-  conventional margins and a number of D3 features:
-    d3.tsv - load and parse data
-    d3.scale.linear - x- and y-position encoding
-    d3.scale.ordinal - color encoding
-    d3.extent - compute domains
-    d3.svg.axis - display axes
-
-** Sébastien Loisel's numeric.js
-
-local copy for convenience
-
-https://github.com/sloisel/numeric
-
-there may be better ones since this 2014? vintage js library
 
 
 * Log Notes:
@@ -125,13 +122,13 @@ modification, are permitted provided that the following conditions are met:
  *The name Mike Kleyn may not be used to endorse or promote products*
   derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL MICHAEL BOSTOCK BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+This software is provided by the copyright holders and contributors "as is"
+and any express or implied warranties, including, but not limited to, the
+implied warranties of merchantability and fitness for a particular purpose are
+disclaimed. in no event shall michael bostock be liable for any direct,
+indirect, incidental, special, exemplary, or consequential damages (including,
+but not limited to, procurement of substitute goods or services; loss of use,
+data, or profits; or business interruption) however caused and on any theory
+of liability, whether in contract, strict liability, or tort (including
+negligence or otherwise) arising in any way out of the use of this software,
+even if advised of the possibility of such damage.
